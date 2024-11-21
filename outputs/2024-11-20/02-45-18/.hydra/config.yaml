@@ -1,4 +1,0 @@
-dds: gr1_upper_body
-encoder: gr1
-frequency: 100
-use_imu: false

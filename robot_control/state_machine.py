@@ -153,7 +153,7 @@ class PIDIMMSetMode(SendOnly):
             super().push(pydds.PIDIMMSetRequest(target, control_position_kp_imm, control_velocity_kp_imm, control_velocity_ki_imm))
 
 class DDSPipeline:
-    def __init__(self, joints:dict, encoders:list, imu:str, freq:int=50, use_imu:bool=False):
+    def __init__(self, joints:dict, encoders:list, imu:str, freq:int=50, use_imu:bool=False, enabled_joint_names:list=None):
         self.context    = pydds.Context()
         self.joints     = joints
         self.encoder_names = list(encoders.keys())
@@ -162,6 +162,7 @@ class DDSPipeline:
         self.use_imu        = use_imu
         self.freq          = freq
         self.joint_names      = list(joints.keys())
+        self.enabled_joint_names = enabled_joint_names
         self.encoder_control  = Encoder(self.context)
         self.motor_control    = MotorControl(self.context)
         self.operation_mode   = OperationMode(self.context)
@@ -205,14 +206,14 @@ class DDSPipeline:
         self.move_joints(joint_pos)
         time.sleep(0.1)
 
-        self.operation_mode.pushs(self.joint_names, 0x01)
-        self.motor_control.pushs(self.joint_names, 0x0F)
+        self.operation_mode.pushs(self.enabled_joint_names, 0x01)
+        self.motor_control.pushs(self.enabled_joint_names, 0x0F)
         self.operation_mode.emit()
         self.motor_control.emit()
         time.sleep(0.01)
     
     def disable_joints(self):
-        self.motor_control.pushs(self.joint_names, 0x06)
+        self.motor_control.pushs(self.enabled_joint_names, 0x06)
         self.motor_control.emit()
         time.sleep(0.01)
 

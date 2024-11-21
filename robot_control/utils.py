@@ -1,4 +1,6 @@
 from enum import Enum
+from dataclasses import dataclass
+import numpy as np
 
 class BaseControlGroup(tuple, Enum):
     """Base class for control group enumerations."""
@@ -36,3 +38,15 @@ class GR2ControlGroup(BaseControlGroup):
     """GR2 Control group enumeration. Each group is a tuple of (start, num_joints). Available groups are: ALL, LEFT_LEG, RIGHT_LEG, WAIST, HEAD, LEFT_ARM, RIGHT_ARM, LOWER, UPPER, UPPER_EXTENDED."""
     # TODO: Implement GR2 control groups
     pass
+
+@dataclass
+class Trajectory:
+    start: np.ndarray
+    end: np.ndarray
+    duration: float
+
+    def at(self, t: float):
+        return self.start + (self.end - self.start) * t / self.duration
+
+    def finished(self, t: float):
+        return t >= self.duration
