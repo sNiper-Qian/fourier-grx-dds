@@ -141,16 +141,28 @@ class RobotController:
 
     def set_gains(
             self,
-            position_control_kp: list[float] | None = None,
-            velocity_control_kp: list[float] | None = None,
-            velocity_control_ki: list[float] | None = None,
-            pd_control_kp: list[float] | None = None,
-            pd_control_kd: list[float] | None = None,
+            position_control_kp: list[float],
+            velocity_control_kp: list[float],
+            velocity_control_ki: list[float],
+            joint_names: list[str] | None = None,
     ):
-        """Set PID gains."""
-        raise NotImplementedError("Method not implemented.")
+        """Set PID gains.
+        
+        Args:
+            position_control_kp (list[float]): The proportional gains for position control. 
+            velocity_control_kp (list[float]): The proportional gains for velocity control.
+            velocity_control_ki (list[float]): The integral gains for velocity control.
+            joint_names (list[str], optional): The names of the joints to set the gains for. Defaults to None, which sets all of the joints.
+        """
+        if joint_names is None:
+            assert len(position_control_kp) == len(velocity_control_kp) == len(velocity_control_ki) == self.num_joints, "Invalid gains shape."
+            joint_names = self.joint_names
+        else:
+            assert len(joint_names) == len(position_control_kp) == len(velocity_control_kp) == len(velocity_control_ki), "Invalid gains shape."
+        self.connector.set_custom_joints_pid_param(position_control_kp, velocity_control_kp, velocity_control_ki, joint_names)
 
     def get_gains(self):
+        # TODO: get gains
         """Get the control gains for all joints."""
         raise NotImplementedError("Method not implemented.")
     

@@ -226,6 +226,17 @@ class DDSPipeline:
                 print(f"Set joint [{joint_name}] pid: position_kp = {position_kp}, velocity_kp = {velocity_kp}")
                 self.pidimm_control.push(joint_name, position_kp, velocity_kp, 0.0)
         self.pidimm_control.emit()
+    
+    def set_custom_joints_pid_param(self, position_kps, velocity_kps, velocity_kis, joint_names=None):
+        for i, joint_name in enumerate(joint_names):
+            joint = self.joints[joint_name]
+            if joint["enable"]:
+                position_kp = position_kps[i]
+                velocity_kp = velocity_kps[i]
+                velocity_ki = velocity_kis[i]
+                print(f"Set joint [{joint_name}] pid: position_kp = {position_kp}, velocity_kp = {velocity_kp}, velocity_ki = {velocity_kis[i]}")
+                self.pidimm_control.push(joint_name, position_kp, velocity_kp, velocity_ki)
+        self.pidimm_control.emit()
 
     def move_joints(self, pairs_joint_and_position):
         for joint, position in pairs_joint_and_position:
