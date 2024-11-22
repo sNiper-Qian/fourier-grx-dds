@@ -1,1 +1,0 @@
-BRIDGE_CONFIG_FILE=configs/dds/config.gr1.json ./robot_control/bin/fftai_dds_bridge

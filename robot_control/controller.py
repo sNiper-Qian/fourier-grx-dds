@@ -137,6 +137,10 @@ class RobotController:
     def enable(self):
         """Enable the motors."""
         self.set_enable(True)
+    
+    def disable(self):
+        """Disable the motors."""
+        self.set_enable(False)
 
     def set_gains(
             self,

@@ -2,8 +2,8 @@ from setuptools import setup, find_packages
 packages = find_packages(include=['robot_control', 'robot_control.*'])
 print("Packages found:", packages)
 setup(
-    name='fourier_utils',
-    version='0.1.1_beta',
+    name='fourier-grx-dds',
+    version='0.1.0_beta',
     packages=find_packages(include=['robot_control', 'robot_control.*']),
     include_package_data=True,
     package_data={

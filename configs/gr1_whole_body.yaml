@@ -34,7 +34,7 @@ named_links:
 # Joint configuration
 joints:
   left_hip_roll_joint:
-    enable: false
+    enable: true
     direction: -1
     initialization_pose_degree: 0
     min_pose_degree: -5.156620156177409
@@ -48,7 +48,7 @@ joints:
     default_pose_degree: 0
     actuator_type: FSA_TYPE_802030
   left_hip_yaw_joint:
-    enable: false
+    enable: true
     direction: 1
     initialization_pose_degree: 0
     min_pose_degree: -40.10704565915762
@@ -62,7 +62,7 @@ joints:
     default_pose_degree: 0
     actuator_type: FSA_TYPE_601750
   left_hip_pitch_joint:
-    enable: false
+    enable: true
     direction: 1
     initialization_pose_degree: 0
     min_pose_degree: -100.26761414789407
@@ -76,7 +76,7 @@ joints:
     default_pose_degree: -15.000033378601074
     actuator_type: FSA_TYPE_1307E
   left_knee_pitch_joint:
-    enable: false
+    enable: true
     direction: -1
     initialization_pose_degree: 0
     min_pose_degree: -5.156620156177409
@@ -90,7 +90,7 @@ joints:
     default_pose_degree: 30.00006675720215
     actuator_type: FSA_TYPE_1307E
   left_ankle_pitch_joint:
-    enable: false
+    enable: true
     direction: -1
     initialization_pose_degree: 0
     min_pose_degree: -60.16056848873644
@@ -104,7 +104,7 @@ joints:
     default_pose_degree: -15.000033378601074
     actuator_type: FSA_TYPE_36B36E
   left_ankle_roll_joint:
-    enable: false
+    enable: true
     direction: 1
     initialization_pose_degree: 0
     min_pose_degree: -25.210142985756224
@@ -118,7 +118,7 @@ joints:
     default_pose_degree: 0
     actuator_type: FSA_TYPE_36B36E
   right_hip_roll_joint:
-    enable: false
+    enable: true
     direction: -1
     initialization_pose_degree: 0
     min_pose_degree: -5.156620156177409
@@ -132,7 +132,7 @@ joints:
     default_pose_degree: 0
     actuator_type: FSA_TYPE_802030
   right_hip_yaw_joint:
-    enable: false
+    enable: true
     direction: 1
     initialization_pose_degree: 0
     min_pose_degree: -40.10704565915762
@@ -146,7 +146,7 @@ joints:
     default_pose_degree: 0
     actuator_type: FSA_TYPE_601750
   right_hip_pitch_joint:
-    enable: false
+    enable: true
     direction: -1
     initialization_pose_degree: 0
     min_pose_degree: -100.26761414789407
@@ -160,7 +160,7 @@ joints:
     default_pose_degree: -15.000033378601074
     actuator_type: FSA_TYPE_1307E
   right_knee_pitch_joint:
-    enable: false
+    enable: true
     direction: 1
     initialization_pose_degree: 0
     min_pose_degree: -5.156620156177409
@@ -174,7 +174,7 @@ joints:
     default_pose_degree: 30.00006675720215
     actuator_type: FSA_TYPE_1307E
   right_ankle_pitch_joint:
-    enable: false
+    enable: true
     direction: 1
     initialization_pose_degree: 0
     min_pose_degree: -60.16056848873644
@@ -188,7 +188,7 @@ joints:
     default_pose_degree: -15.000033378601074
     actuator_type: FSA_TYPE_36B36E
   right_ankle_roll_joint:
-    enable: false
+    enable: true
     direction: -1
     initialization_pose_degree: 0
     min_pose_degree: -25.210142985756224
@@ -202,7 +202,7 @@ joints:
     default_pose_degree: 0
     actuator_type: FSA_TYPE_36B36E
   waist_yaw_joint:
-    enable: false
+    enable: true
     direction: -1
     initialization_pose_degree: 0
     min_pose_degree: -60.16056848873644
@@ -216,7 +216,7 @@ joints:
     default_pose_degree: 0
     actuator_type: FSA_TYPE_601750
   waist_pitch_joint:
-    enable: false
+    enable: true
     direction: -1
     initialization_pose_degree: 0
     min_pose_degree: -29.79380534680281
@@ -230,7 +230,7 @@ joints:
     default_pose_degree: 0
     actuator_type: FSA_TYPE_601750
   waist_roll_joint:
-    enable: false
+    enable: true
     direction: -1
     initialization_pose_degree: 0
     min_pose_degree: -40.10704565915762
@@ -258,7 +258,7 @@ joints:
     default_pose_degree: 0
     actuator_type: FSA_TYPE_250830
   head_roll_joint:
-    enable: false
+    enable: true
     direction: -1
     initialization_pose_degree: 0
     min_pose_degree: -20.05352282957881
@@ -483,63 +483,63 @@ joints:
     actuator_type: FSA_TYPE_250830
 encoders:
   left_hip_roll_joint_encoder:
-    enable: false
+    enable: true
     reduction_ratio: 2
     direction: 1
   left_hip_yaw_joint_encoder:
-    enable: false
+    enable: true
     reduction_ratio: 2.77
     direction: 1
   left_hip_pitch_joint_encoder:
-    enable: false
+    enable: true
     reduction_ratio: 2.514
     direction: -1
   left_knee_pitch_joint_encoder:
-    enable: false
+    enable: true
     reduction_ratio: 1
     direction: 1
   left_ankle_pitch_joint_encoder:
-    enable: false
+    enable: true
     reduction_ratio: 1
     direction: 1
   left_ankle_roll_joint_encoder:
-    enable: false
+    enable: true
     reduction_ratio: 1
     direction: -1
   right_hip_roll_joint_encoder:
-    enable: false
+    enable: true
     reduction_ratio: 2
     direction: 1
   right_hip_yaw_joint_encoder:
-    enable: false
+    enable: true
     reduction_ratio: 2.77
     direction: 1
   right_hip_pitch_joint_encoder:
-    enable: false
+    enable: true
     reduction_ratio: 2.514
     direction: 1
   right_knee_pitch_joint_encoder:
-    enable: false
+    enable: true
     reduction_ratio: 1
     direction: -1
   right_ankle_pitch_joint_encoder:
-    enable: false
+    enable: true
     reduction_ratio: 1
     direction: -1
   right_ankle_roll_joint_encoder:
-    enable: false
+    enable: true
     reduction_ratio: 1
     direction: 1
   waist_yaw_joint_encoder:
-    enable: false
+    enable: true
     reduction_ratio: 4.08
     direction: 1
   waist_pitch_joint_encoder:
-    enable: false
+    enable: true
     reduction_ratio: 1
     direction: 1
   waist_roll_joint_encoder:
-    enable: false
+    enable: true
     reduction_ratio: 1
     direction: 1
 imu: Body/IMU

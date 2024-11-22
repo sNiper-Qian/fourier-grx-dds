@@ -19,15 +19,16 @@ class RobotWrapper:
             package_dirs=[str(d) for d in self.config.urdf_package_dirs],
             root_joint=pin.JointModelFreeFlyer(),
         )
-        # self.disabled_joint_names = self.config.joints_to_lock
-        # # self.disabled_joint_names = set([joint_name for joint_name in config.joints if not config.joints[joint_name]["enable"]])
-        # if len(self.disabled_joint_names) > 0:
-        #     logger.info(f"Locking joints: {self.disabled_joint_names}")
-        #     self.robot = self.robot.buildReducedRobot(self.disabled_joint_names)
+        self.joint_names = list(self.config.joints.keys())
+        self.disabled_joint_names = set([joint_name for joint_name in self.config.joints if not config.joints[joint_name]["enable"]])
+        if len(self.disabled_joint_names) > 0:
+            logger.info(f"Locking joints: {self.disabled_joint_names}")
+            self.robot = self.robot.buildReducedRobot(self.disabled_joint_names)
 
-        # for name, prop in self.config.joints.items():
-        #     logger.info(f"Setting joint limits for {name}: {np.deg2rad(prop["min_pose_degree"]), np.deg2rad(prop["max_pose_degree"])}")
-        #     self.set_joint_limits(name, np.deg2rad(prop["min_pose_degree"]), np.deg2rad(prop["max_pose_degree"]))
+        for name, prop in self.config.joints.items():
+            if name in self.disabled_joint_names:
+                continue
+            self.set_joint_limits(name, np.deg2rad(prop["min_pose_degree"]), np.deg2rad(prop["max_pose_degree"]))
 
         if self.config.self_collision.enable:
             for g1, g2 in itertools.combinations(self.config.self_collision.enabled_links, 2):
@@ -131,7 +132,7 @@ class RobotWrapper:
         Args:
             name (str): Name of the joint.
         """
-        if name in self.config.joints_to_lock:
+        if name in self.disabled_joint_names:
             return 0.0
         return self.configuration.q[self.get_idx_q_from_name(name)]
 
@@ -149,7 +150,7 @@ class RobotWrapper:
         Args:
             name (str): Name of the joint.
         """
-        if name in self.config.joints_to_lock:
+        if name in self.disabled_joint_names:
             return 0.0
         return self.configuration.data.dq_after[self.get_idx_v_from_name(name)]
 
@@ -199,7 +200,7 @@ class RobotWrapper:
             positions = np.deg2rad(positions)
         current_q = self.configuration.q.copy()
         for joint_name, position in zip(joint_names, positions, strict=True):
-            if joint_name in self.config.joints_to_lock:
+            if joint_name in self.disabled_joint_names:
                 continue
             q_idx = self.get_idx_q_from_name(joint_name)
 
@@ -221,7 +222,7 @@ class RobotWrapper:
         Returns:
             q (NDArray): joint positions
         """
-        return np.array([self.configuration.q[self.get_idx_q_from_name(name)] for name in joint_names])
+        return np.array([self.get_q_from_name(name) for name in joint_names])
 
     def set_joint_limits(self, joint_name: str, lower: float, upper: float):
         """Set joint upper and lower limits. Note this does not update the robot data.

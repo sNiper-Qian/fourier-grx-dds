@@ -1,4 +1,5 @@
 robot_control/__pycache__/
 build/
 dist/
+scripts/
 *.egg-info/
