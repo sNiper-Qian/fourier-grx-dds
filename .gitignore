@@ -3,3 +3,4 @@ build/
 dist/
 scripts/
 *.egg-info/
+configs/encoders_state.yaml
