@@ -1,5 +1,4 @@
 from omegaconf import DictConfig, OmegaConf
-import time
 from typing import Literal
 
 import numpy as np
@@ -9,7 +8,6 @@ import qpsolvers
 
 from robot_control.robot_wrapper import RobotWrapper
 from pathlib import Path
-
 
 class KinematicsSolver(RobotWrapper):
     def __init__(self, config: DictConfig):

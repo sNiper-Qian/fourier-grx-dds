@@ -1,0 +1,3 @@
+include robot_control/libraries/*.so
+include robot_control/bin/your_executable
+include robot_control/pydds/libpydds.so
