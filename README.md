@@ -31,6 +31,7 @@ This script will add the necessary LD_LIBRARY_PATH to .bashrc
 
 ```bash
 source configure_env.sh
+source ~/.bashrc
 ```
 
 
