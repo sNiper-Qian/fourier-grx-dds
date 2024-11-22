@@ -6,7 +6,7 @@ import pink
 import pinocchio as pin
 import qpsolvers
 
-from robot_control.robot_wrapper import RobotWrapper
+from fourier_grx_dds.robot_wrapper import RobotWrapper
 from pathlib import Path
 
 class KinematicsSolver(RobotWrapper):

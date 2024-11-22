@@ -15,7 +15,7 @@ For users who have been using fourier-grx-client and those who are new to this l
 Run:
 
 ```bash
-pip install fourier-grx-dds==0.1.0b0
+pip install fourier-grx-dds==0.1.1b0
 
 ```
 
@@ -26,6 +26,13 @@ git clone https://gitee.com/FourierIntelligence/fourier-grx-dds.git
 cd fourier-grx-dds
 pip install -e .
 ```
+#### Configure environment
+This script will add the necessary LD_LIBRARY_PATH to .bashrc
+
+```bash
+source configure_env.sh
+```
+
 
 ## Usage
 

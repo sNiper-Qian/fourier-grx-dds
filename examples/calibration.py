@@ -1,4 +1,4 @@
-from robot_control.state_machine import DDSPipeline
+from fourier_grx_dds.state_machine import DDSPipeline
 import json
 import os
 import argparse

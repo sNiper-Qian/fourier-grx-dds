@@ -6,7 +6,7 @@ LastEditTime: 2024-10-16 03:59:18
 FilePath: /data/robot_system/sim/state_machine.py
 Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 '''
-from robot_control import pydds
+from robotfourier_grx_dds_control import pydds
 import time
 
 class StateMachine:

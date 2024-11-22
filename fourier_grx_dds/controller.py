@@ -1,14 +1,14 @@
 from pathlib import Path
-from robot_control.utils import BaseControlGroup, GR1ControlGroup, GR2ControlGroup, Trajectory
-from robot_control.state_machine import DDSPipeline
+from fourier_grx_dds.utils import BaseControlGroup, GR1ControlGroup, GR2ControlGroup, Trajectory
+from fourier_grx_dds.state_machine import DDSPipeline
 from loguru import logger
 from omegaconf import OmegaConf
-from robot_control.pydds.parallel_joints_solver import PoseSolver
+from fourier_grx_dds.pydds.parallel_joints_solver import PoseSolver
 import os
 import numpy as np
 import time
-from robot_control.exceptions import FourierValueError
-from robot_control.kinematics import KinematicsSolver
+from fourier_grx_dds.exceptions import FourierValueError
+from fourier_grx_dds.kinematics import KinematicsSolver
 import threading
 
 class RobotController:

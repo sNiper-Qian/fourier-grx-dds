@@ -2,8 +2,8 @@
 A simple example to demonstrate the usage of the robot controller.
 '''
 import argparse
-from robot_control.utils import GR1ControlGroup
-from robot_control.controller import RobotController
+from fourier_grx_dds.utils import GR1ControlGroup
+from fourier_grx_dds.controller import RobotController
 import time
 
 def main() -> None:

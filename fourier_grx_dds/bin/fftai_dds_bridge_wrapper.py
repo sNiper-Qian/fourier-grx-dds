@@ -1,4 +1,4 @@
-# robot_control/bin/fftai_dds_bridge_wrapper.py
+# fourier_grx_dds/bin/fftai_dds_bridge_wrapper.py
 
 import os
 import sys

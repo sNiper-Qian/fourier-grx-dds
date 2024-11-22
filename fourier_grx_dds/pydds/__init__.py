@@ -6,7 +6,7 @@ LastEditTime: 2024-10-15 08:42:36
 FilePath: /data/robot_system/sim/pydds/__init__.py
 Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 '''
-# robot_control/pydds/__init__.py
+# fourier_grx_dds/pydds/__init__.py
 
 import os
 import ctypes
@@ -192,4 +192,4 @@ class PIDIMMGetResponseSubscriber:
         ...
 
 
-from robot_control.pydds.libpydds import *
+from fourier_grx_dds.pydds.libpydds import *

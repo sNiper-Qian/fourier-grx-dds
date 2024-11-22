@@ -1,18 +1,18 @@
 from setuptools import setup, find_packages
-packages = find_packages(include=['robot_control', 'robot_control.*'])
+packages = find_packages(include=['fourier_grx_dds', 'fourier_grx_dds.*'])
 print("Packages found:", packages)
 setup(
     name='fourier-grx-dds',
-    version='0.1.0_beta',
-    packages=find_packages(include=['robot_control', 'robot_control.*']),
+    version='0.1.1_beta',
+    packages=find_packages(include=['fourier_grx_dds', 'fourier_grx_dds.*']),
     include_package_data=True,
     package_data={
-        'robot_control': ['bin/fftai_dds_bridge', 'libraries/*.so'],
-        'robot_control.pydds': ['libpydds.so', 'parallel_joints_solver.so'],
+        'fourier_grx_dds': ['bin/fftai_dds_bridge', 'libraries/*'],
+        'fourier_grx_dds.pydds': ['libpydds.so', 'parallel_joints_solver.so'],
     },
     entry_points={
         'console_scripts': [
-            'fftai_dds_bridge=robot_control.bin.fftai_dds_bridge_wrapper:main',
+            'fftai_dds_bridge=fourier_grx_dds.bin.fftai_dds_bridge_wrapper:main',
         ],
     },
     zip_safe=False,
