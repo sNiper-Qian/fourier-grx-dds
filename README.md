@@ -22,8 +22,8 @@ pip install fourier-grx-dds==0.1.0b0
 #### Install from source
 
 ```bash
-git clone https://github.com/FFTAI/fourier-grx-client.git
-cd fourier-grx-client
+git clone https://gitee.com/FourierIntelligence/fourier-grx-dds.git
+cd fourier-grx-dds
 pip install -e .
 ```
 
