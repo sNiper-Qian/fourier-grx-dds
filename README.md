@@ -15,6 +15,7 @@ For users who have been using fourier-grx-client and those who are new to this l
 Run:
 
 ```bash
+sudo apt install libtinyxml2-6a
 pip install fourier-grx-dds==0.1.2b0
 
 ```

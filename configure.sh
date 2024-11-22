@@ -13,3 +13,5 @@ fi
 
 # Set LD_LIBRARY_PATH
 echo "export LD_LIBRARY_PATH=$fourier_grx_dds_libraries:\$LD_LIBRARY_PATH" >> ~/.bashrc
+
+export LD_LIBRARY_PATH=$(python3 -c "import sysconfig; print(sysconfig.get_config_var('LIBDIR'))"):$LD_LIBRARY_PATH
