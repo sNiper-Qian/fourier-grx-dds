@@ -8,6 +8,8 @@ Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查�
 '''
 from fourier_grx_dds import pydds
 import time
+from enum import IntEnum
+from fourier_grx_dds.utils import MotorOperationMode
 
 class StateMachine:
     def __init__(self, dds_context, targets):
@@ -138,6 +140,20 @@ class PositionControlMode(SendOnly):
         for target in targets:
             super().push(pydds.PositionControlRequest(target, pos))
 
+class CurrentControlMode(SendOnly):
+    def __init__(self, dds_context):
+        super().__init__(
+            pydds.CurrentControlRequestPublisher(dds_context, "/fftai/gr1t2/current_control/request", True, 5000), 
+            pydds.CurrentControlResponseSubscriber(dds_context, "/fftai/gr1t2/current_control/response", True, 5000)
+        )
+
+    def push(self, target, pos):
+        super().push(pydds.CurrentControlRequest(target, pos))
+
+    def pushs(self, targets, pos):
+        for target in targets:
+            super().push(pydds.CurrentControlRequest(target, pos))
+
 class PIDIMMSetMode(SendOnly):
     def __init__(self, dds_context):
         super().__init__(
@@ -167,6 +183,7 @@ class DDSPipeline:
         self.motor_control    = MotorControl(self.context)
         self.operation_mode   = OperationMode(self.context)
         self.position_control = PositionControlMode(self.context)
+        self.current_control = CurrentControlMode(self.context)
         self.pidimm_control   = PIDIMMSetMode(self.context)
         self.pvc_state        = PVCStateMachine(self.context, self.joint_names)
         if self.use_imu:
@@ -178,14 +195,31 @@ class DDSPipeline:
         del self.pvc_state
         del self.pidimm_control
         del self.position_control
+        del self.current_control
         del self.operation_mode
         del self.motor_control
         del self.encoder_control
         del self.context
 
-    def set_control_mode(self):
-        self.operation_mode.pushs(self.joint_names, 0x01)
+    def set_control_mode(self, joint_name: str, mode: MotorOperationMode | str):
+        if isinstance(mode, str):
+            try:
+                mode = MotorOperationMode[mode.upper()]
+            except KeyError:
+                raise ValueError(f"Invalid mode: {mode}")
+        self.operation_mode.pushs(joint_name, mode.value)
         self.operation_mode.emit()
+        time.sleep(0.01)
+
+    def set_control_modes(self, joint_names: list[str], modes: list[MotorOperationMode | str]):
+        for joint_name, mode in zip(joint_names, modes):
+            if isinstance(mode, str):
+                try:
+                    mode = MotorOperationMode[mode.upper()]
+                except KeyError:
+                    raise ValueError(f"Invalid mode: {mode} for joint {joint_name}")
+            self.operation_mode.pushs(joint_name, mode.value)
+            self.operation_mode.emit()
         time.sleep(0.01)
 
     def enable_joints(self):
@@ -242,6 +276,11 @@ class DDSPipeline:
         for joint, position in pairs_joint_and_position:
             self.position_control.push(joint, position)
         self.position_control.emit()
+    
+    def set_current(self, pairs_joint_and_current):
+        for joint, current in pairs_joint_and_current:
+            self.current_control.push(joint, current)
+        self.current_control.emit()
 
     def get_pvc_latencys(self):
         return self.pvc_state.get_latencys()

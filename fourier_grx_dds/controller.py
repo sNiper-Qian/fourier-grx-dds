@@ -231,6 +231,12 @@ class RobotController:
             thread.daemon = True
             thread.start()
     
+    def set_current(self, currents: np.ndarray | list):
+        """Set the current of the robot."""
+        def pos2cmd(currents):
+            return [(joint_name, currents[i]) for i, joint_name in enumerate(self.joint_names)]
+        self.connector.set_current(pos2cmd(currents))
+    
     def forward_kinematics(self, chain_names: list[str], q: np.ndarray | None = None) -> list[np.ndarray]:
         """Get the end effector pose of the specified chains in base_link frame.
 

@@ -50,3 +50,9 @@ class Trajectory:
 
     def finished(self, t: float):
         return t >= self.duration
+
+class MotorOperationMode:
+    """Motor operation mode enumeration."""
+    POSITION = 0x01
+    VELOCITY = 0x03
+    CURRENT  = 0x04
