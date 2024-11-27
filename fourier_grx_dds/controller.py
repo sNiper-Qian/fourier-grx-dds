@@ -23,6 +23,7 @@ class RobotController:
             cfg_path (Path): Path to the configuration file.
         """
         self.config = OmegaConf.load(cfg_path)
+        self.domain_id = self.config.get("domain_id", 0)
         self.joints = self.config.joints
         self.joint_names = list(self.joints.keys())
         self.enabled_joint_names = set([joint_name for joint_name in self.joints if self.joints[joint_name]["enable"]]) # TODO: fix joint names
@@ -42,7 +43,8 @@ class RobotController:
                                      self.config.imu, 
                                      self.config.frequency, 
                                      self.config.use_imu,
-                                     self.enabled_joint_names
+                                     self.enabled_joint_names,
+                                     domain_id=self.domain_id,
                                      )
         self.init_encoders()
         self.connector.set_joints_pid_param()
