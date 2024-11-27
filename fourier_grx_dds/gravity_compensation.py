@@ -121,9 +121,9 @@ class JointImpedanceSolver:
             pass
 
 class GravityCompensator(RobotController):
-    def __init__(self, cfg_path: Path, domain_id: int = 0, dt: float | None = None, target_hz: int | None = None):
+    def __init__(self, cfg_path: Path, dt: float | None = None, target_hz: int | None = None):
         """initialize upbody parameters"""
-        super().__init__(cfg_path=cfg_path, domain_id=domain_id)
+        super().__init__(cfg_path=cfg_path)
         self.config = self.config
         self.ctrl_idx = self.control_group.UPPER_EXTENDED.list
         if target_hz is None:
