@@ -8,8 +8,9 @@ import numpy as np
 import pinocchio as pin
 from loguru import logger
 from omegaconf import DictConfig
+from pathlib import Path
 
-from fourier_grx_dds.utils import ControlMode
+from fourier_grx_dds.utils import ControlMode, BaseControlGroup, Trajectory
 from fourier_grx_dds.exceptions import FourierValueError
 from fourier_grx_dds.controller import RobotController
 from fourier_grx_dds.robot_wrapper import RobotWrapper
@@ -119,15 +120,14 @@ class JointImpedanceSolver:
         else:
             pass
 
-class GravityCompensation:
-    def __init__(self, controller: RobotController, dt: float | None = None, target_hz: int = 200):
+class GravityCompensator(RobotController):
+    def __init__(self, cfg_path: Path, dt: float | None = None, target_hz: int = 200):
         """initialize upbody parameters"""
-        self.config = controller.config
-        self.ctrl_idx = controller.control_group.UPPER_EXTENDED.list
+        super().__init__(cfg_path=cfg_path)
+        self.config = self.config
+        self.ctrl_idx = self.control_group.UPPER_EXTENDED.list
         self.target_hz = target_hz
         self.joint_names = list(self.config.joints.keys())
-        self.controller = controller
-        self.robot = controller.solver
 
         self.current_to_torque = [
             2.68,
@@ -224,26 +224,30 @@ class GravityCompensation:
                 ],
             )
         )
-        self.solver = JointImpedanceSolver(order, dim, k, b, m, max_effort)
+        self.impedance_solver = JointImpedanceSolver(order, dim, k, b, m, max_effort)
 
-    def enable(self):
+    def enable_gc(self):
         if self.enabled:
             return
         self.enabled = True
         self.position_history.clear()
         self._set_mixed_mode_gains()
 
-    def disable(self):
+    def disable_gc(self):
         if not self.enabled:
             return
         self.position_history.clear()
         self.enabled = False
-        self.controller.set_control_modes([ControlMode.POSITION]*self.controller.num_joints)
+        self.set_control_modes([ControlMode.POSITION]*self.num_joints)
         time.sleep(0.1)
         # self._restore_origin_control_config()
+    
+    def disable(self):
+        self.disable_gc()
+        super().disable()
 
     def _record_origin_control_config(self):
-        self.original_ctrl_mode = self.controller.get_control_modes()
+        self.original_ctrl_mode = self.get_control_modes()
         # self.origin_gains = {
         #     "position_control_kp": self.server.control_commands["position_control_kp"],
         #     "velocity_control_kp": self.server.control_commands["velocity_control_kp"],
@@ -251,11 +255,11 @@ class GravityCompensation:
         #     "pd_control_kp": self.server.control_commands["pd_control_kp"],
         #     "pd_control_kd": self.server.control_commands["pd_control_kd"],
         # }
-        self.original_gain = self.controller.get_gains()
+        self.original_gain = self.get_gains()
 
     def _restore_origin_control_config(self):
-        self.controller.set_control_modes(self.original_ctrl_mode)
-        self.controller.set_gains(self.original_gain)
+        self.set_control_modes(self.original_ctrl_mode)
+        self.set_gains(self.original_gain)
 
     def _set_mixed_mode_gains(self):
         """Set the control mode and corresponding PID parameters"""
@@ -270,18 +274,18 @@ class GravityCompensation:
             + [ControlMode.CURRENT] * 4
             + [ControlMode.POSITION] * 3
         )  # set lower as none and upbody as PD
-        self.controller.set_control_modes(control_mode)
+        self.set_control_modes(control_mode)
     
     def pause(self):
         curr_cmd = np.zeros(32)
-        self.controller.set_currents(self.controller.control_group.ALL, curr_cmd)
+        self.set_currents(self.control_group.ALL, curr_cmd)
 
-        q_real = self.controller.joint_positions.copy()
+        q_real = self.joint_positions.copy()
         pos_cmd = q_real.copy()
-        self.controller.move_joints(self.controller.control_group.ALL, pos_cmd)
+        self.move_joints(self.control_group.ALL, pos_cmd)
     
     def stop(self):
-        q_real = self.controller.joint_positions.copy()
+        q_real = self.joint_positions.copy()
         pos_cmd = q_real.copy()
         self.run(p=pos_cmd)
 
@@ -296,11 +300,11 @@ class GravityCompensation:
         p = np.asarray(p) if p is not None else None
         v = np.asarray(v) if v is not None else None
         acc = np.asarray(acc) if acc is not None else None
-        if isinstance(p, np.ndarray) and p.shape[0] != self.controller.num_joints:
+        if isinstance(p, np.ndarray) and p.shape[0] != self.num_joints:
             raise FourierValueError("The length of the position vector must match the number of joints.")
-        if isinstance(v, np.ndarray) and v.shape[0] != self.controller.num_joints:
+        if isinstance(v, np.ndarray) and v.shape[0] != self.num_joints:
             raise FourierValueError("The length of the velocity vector must match the number of joints.")
-        if isinstance(acc, np.ndarray) and acc.shape[0] != self.controller.num_joints:
+        if isinstance(acc, np.ndarray) and acc.shape[0] != self.num_joints:
             raise FourierValueError("The length of the acceleration vector must match the number of joints.")
 
         if p is not None:
@@ -327,13 +331,13 @@ class GravityCompensation:
                 except Exception as e:
                     logger.error(f"Error in estimating velocity: {e}")
 
-        q_real = self.controller.joint_positions.copy()
-        qd_real = self.controller.joint_velocities.copy()
+        q_real = self.joint_positions.copy()
+        qd_real = self.joint_velocities.copy()
         qdd_real = np.zeros_like(qd_real)
 
-        q_pin = self.robot.q_real2pink(q_real)
+        q_pin = self.kinematics_solver.q_real2pink(q_real)
 
-        gravity = self.robot.dq_pink2real(pin.computeGeneralizedGravity(self.robot.model, self.robot.data, q_pin))[-20:]
+        gravity = self.kinematics_solver.dq_pink2real(pin.computeGeneralizedGravity(self.kinematics_solver.model, self.kinematics_solver.data, q_pin))[-20:]
         if enable_track is True and p is not None:
             # if p is None:
             #     p = np.zeros(len(self.ctrl_idx))  # rad, length = 20
@@ -342,7 +346,7 @@ class GravityCompensation:
             if acc is None:
                 acc = np.zeros_like(p)
 
-            self.solver.update_controller_state(
+            self.impedance_solver.update_controller_state(
                 q_real[self.ctrl_idx],
                 qd_real[self.ctrl_idx],
                 qdd_real[self.ctrl_idx],
@@ -351,7 +355,7 @@ class GravityCompensation:
                 acc[self.ctrl_idx],
             )
 
-            impedance_torque = self.solver.get_output(gravity)  # length: 20
+            impedance_torque = self.impedance_solver.get_output(gravity)  # length: 20
 
             # Tracking the desired position trajectory and implementing a simple controller
             impedance_current = [
@@ -359,12 +363,12 @@ class GravityCompensation:
             ]
             try:
                 curr_cmd = np.zeros(32)
-                curr_cmd[self.ctrl_idx] = impedance_current * self.controller.default_pose_solver_.joints_direction[self.ctrl_idx]
-                self.controller.set_currents(self.controller.control_group.ALL, curr_cmd)
+                curr_cmd[self.ctrl_idx] = impedance_current * self.default_pose_solver_.joints_direction[self.ctrl_idx]
+                self.set_currents(self.control_group.ALL, curr_cmd)
 
                 pos_cmd = q_real.copy()
                 pos_cmd[[15, 16, 17, 22, 23, 24, 29, 30, 31]] = p[[15, 16, 17, 22, 23, 24, 29, 30, 31]]
-                self.controller.move_joints(self.controller.control_group.ALL, pos_cmd)
+                super().move_joints(self.control_group.ALL, pos_cmd)
                 return True
             except Exception as e:
                 logger.error(f"Error during impedance control: {e}")
@@ -376,8 +380,47 @@ class GravityCompensation:
             ]
             curr_cmd = np.zeros(32)
             curr_cmd[self.ctrl_idx] = gravity_control_current
-            self.controller.set_currents(self.controller.control_group.ALL, curr_cmd)
+            self.set_currents(self.control_group.ALL, curr_cmd)
             return True
+    
+    def move_joints(
+            self,
+            group: BaseControlGroup | list | str,
+            positions: np.ndarray | list,
+            duration: float = 0.0,
+            degrees: bool = False,
+            blocking: bool = True,
+            gravity_compensation: bool = False,
+        ):
+        """Move in joint space with time duration.
+
+        Move in joint space with time duration in a separate thread. Can be aborted using `abort()`. Can be blocking.
+        If the duration is set to 0, the joints will move in their maximum speed without interpolation.
+        """
+        if not gravity_compensation:
+            if self.enabled:
+                self.disable_gc()
+            super().move_joints(group, positions, duration, degrees, blocking)
+        else:
+            if not self.enabled:
+                self.enable_gc()
+            positions = np.asarray(positions) if not degrees else np.deg2rad(positions)
+            target_pos = self.joint_positions.copy()
+
+            if isinstance(group, BaseControlGroup):
+                if positions.shape != (group.num_joints,):
+                    raise ValueError(f"Invalid joint position shape: {positions.shape}, expected: {(group.num_joints,)}")
+                target_pos[group.slice] = positions
+            elif isinstance(group, list):
+                if len(group) != len(positions):
+                    raise ValueError(f"Invalid joint position shape: {positions.shape}, expected: {(len(group),)}")
+                target_pos[group] = positions
+            elif isinstance(group, str):
+                try:
+                    target_pos[BaseControlGroup[group.upper()].slice] = positions
+                except KeyError as ex:
+                    raise FourierValueError(f"Unknown group name: {group}") from ex
+            self.run(p=target_pos, enable_track=True)
 
 class CommandHistory:
     def __init__(self, target_hz: int = 200, horizon: float = 0.1):
@@ -431,7 +474,7 @@ def pchip_interpolate(timestamps: np.ndarray, commands: np.ndarray, target_hz: i
 class Upsampler(threading.Thread):
     def __init__(
         self,
-        controller: GravityCompensation,
+        controller: GravityCompensator,
         dimension: int = 32,
         initial_command: np.ndarray | None = None,
         gravity_compensation: bool = False,

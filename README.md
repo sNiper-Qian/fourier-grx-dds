@@ -34,13 +34,7 @@ source configure.sh
 source ~/.bashrc
 ```
 
-## Usage
-
-Please read the [Tutorial](tutorial.ipynb) for a more detailed step-by-step guide on how to get started and use the interfaces.
-
-Demo scripts can be found in the [examples](examples/) directory.
-
-#### A Tiny Example
+## Quick Start
 Start the DDS bridge:
 ```bash
 BRIDGE_CONFIG_FILE=configs/dds/config.gr1.json fftai_dds_bridge
@@ -49,3 +43,10 @@ Run a simple script, which lets robot arms move to a target position and move to
 ```bash
 python examples/run.py --config configs/gr1_upper_body.yaml
 ```
+
+## Usage
+
+Please read the [Tutorial](tutorial.ipynb) for a more detailed step-by-step guide on how to get started and use the interfaces.
+
+Demo scripts can be found in the [examples](examples/) directory.
+

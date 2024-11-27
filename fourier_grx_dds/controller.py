@@ -9,7 +9,6 @@ import threading
 
 from fourier_grx_dds.exceptions import FourierValueError
 from fourier_grx_dds.kinematics import KinematicsSolver
-from fourier_grx_dds.gravity_compensation import GravityCompensation, Upsampler
 from fourier_grx_dds.utils import BaseControlGroup, GR1ControlGroup, GR2ControlGroup, Trajectory
 from fourier_grx_dds.state_machine import DDSPipeline
 from fourier_grx_dds.utils import ControlMode
@@ -64,7 +63,6 @@ class RobotController:
                                             pvc_states)
         self._abort_event = threading.Event()
         self._move_lock = threading.Lock()
-        self.gc = GravityCompensation(self, target_hz=self.config.get("target_hz", 500))
         
     def init_encoders(self):
         """Initialize the encoders state."""
@@ -83,7 +81,7 @@ class RobotController:
     
     def init_kinematics_solver(self):
         """Initialize the kinematics solver."""
-        self.solver = KinematicsSolver(self.config)
+        self.kinematics_solver = KinematicsSolver(self.config)
         logger.info("Kinematics solver initialized.")
 
     @property
@@ -224,7 +222,6 @@ class RobotController:
             duration: float = 0.0,
             degrees: bool = False,
             blocking: bool = True,
-            gravity_compensation: bool = False,
         ):
         """Move in joint space with time duration.
 
@@ -251,14 +248,6 @@ class RobotController:
         target_pos = self.default_pose_solver_.inverse(target_pos) # solve target pose
         current_pos = np.rad2deg(self.joint_positions.copy())
         current_pos = self.default_pose_solver_.inverse(current_pos) # solve current pose
-
-        if gravity_compensation:
-            if not self.gc.enabled:
-                self.gc.enable()
-            self.gc.run(target_pos, enable_track=True)
-        else:
-            if self.gc.enabled:
-                self.gc.disable()
         
         def pos2cmd(pos):
             return [(joint_name, pos[i]) for i, joint_name in enumerate(self.joint_names)]
@@ -329,12 +318,12 @@ class RobotController:
                 raise ValueError(f"Unknown chain name: {chain}")
             current_q = self.joint_positions.copy()
             if q is not None:
-                self.solver.set_joint_positions(self.joint_names, q)
+                self.kinematics_solver.set_joint_positions(self.joint_names, q)
             else:
-                self.solver.set_joint_positions(self.joint_names, current_q)
-            res.append(self.solver.get_transform(self.config.ee_link[chain], "base_link"))
+                self.kinematics_solver.set_joint_positions(self.joint_names, current_q)
+            res.append(self.kinematics_solver.get_transform(self.config.ee_link[chain], "base_link"))
             # Recover the original joint positions
-            self.solver.set_joint_positions(self.joint_names, current_q)
+            self.kinematics_solver.set_joint_positions(self.joint_names, current_q)
         return res
 
     def inverse_kinematics(
@@ -361,8 +350,8 @@ class RobotController:
         left_target = None if "left_arm" not in chain_names else targets[chain_names.index("left_arm")]
         right_target = None if "right_arm" not in chain_names else targets[chain_names.index("right_arm")]
         head_target = None if "head" not in chain_names else targets[chain_names.index("head")]
-        self.solver.solve(left_target, right_target, head_target, dt)
-        q = self.solver.get_joint_positions(self.joint_names)
+        self.kinematics_solver.solve(left_target, right_target, head_target, dt)
+        q = self.kinematics_solver.get_joint_positions(self.joint_names)
         if move:
             self.move_joints(GR1ControlGroup.ALL, q, duration=dt/velocity_scaling_factor*100, blocking=True)
             self.is_moving = False
