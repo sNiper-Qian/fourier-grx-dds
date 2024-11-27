@@ -9,7 +9,7 @@ Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查�
 from fourier_grx_dds import pydds
 import time
 from enum import IntEnum
-from fourier_grx_dds.utils import MotorOperationMode
+from fourier_grx_dds.utils import ControlMode
 
 class StateMachine:
     def __init__(self, dds_context, targets):
@@ -201,26 +201,26 @@ class DDSPipeline:
         del self.encoder_control
         del self.context
 
-    def set_control_mode(self, joint_name: str, mode: MotorOperationMode | str):
+    def set_control_mode(self, joint_name: str, mode: ControlMode | str):
         if isinstance(mode, str):
             try:
-                mode = MotorOperationMode[mode.upper()]
+                mode = ControlMode[mode.upper()]
             except KeyError:
                 raise ValueError(f"Invalid mode: {mode}")
-        self.operation_mode.pushs(joint_name, mode.value)
+        self.operation_mode.push(joint_name, mode.value)
         self.operation_mode.emit()
-        time.sleep(0.01)
+        time.sleep(0.1)
 
-    def set_control_modes(self, joint_names: list[str], modes: list[MotorOperationMode | str]):
+    def set_control_modes(self, joint_names: list[str], modes: list[ControlMode | str]):
         for joint_name, mode in zip(joint_names, modes):
             if isinstance(mode, str):
                 try:
-                    mode = MotorOperationMode[mode.upper()]
+                    mode = ControlMode[mode.upper()]
                 except KeyError:
                     raise ValueError(f"Invalid mode: {mode} for joint {joint_name}")
-            self.operation_mode.pushs(joint_name, mode.value)
+            self.operation_mode.push(joint_name, mode.value)
             self.operation_mode.emit()
-        time.sleep(0.01)
+        time.sleep(0.1)
 
     def enable_joints(self):
         time.sleep(0.1)

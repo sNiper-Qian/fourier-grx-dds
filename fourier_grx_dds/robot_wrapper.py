@@ -19,8 +19,13 @@ class RobotWrapper:
             package_dirs=[str(d) for d in self.config.urdf_package_dirs],
             root_joint=pin.JointModelFreeFlyer(),
         )
+        self.full_model = self.robot.model # model with all joints
         self.joint_names = list(self.config.joints.keys())
-        self.disabled_joint_names = set([joint_name for joint_name in self.config.joints if not config.joints[joint_name]["enable"]])
+        if self.config.joints_to_lock:
+            self.disabled_joint_names = self.config.joints_to_lock
+        else:
+            self.disabled_joint_names = []
+        # self.disabled_joint_names = set([joint_name for joint_name in self.config.joints if not config.joints[joint_name]["enable"]])
         if len(self.disabled_joint_names) > 0:
             logger.info(f"Locking joints: {self.disabled_joint_names}")
             self.robot = self.robot.buildReducedRobot(self.disabled_joint_names)
@@ -86,34 +91,53 @@ class RobotWrapper:
     def q_real(self):
         """Get q vector in the real robot convention (length is 32, order same as config.joint_names)."""
         q = []
-        for name in self.config.joint_names:
+        for name in self.joint_names:
             q.append(self.get_q_from_name(name))
         return np.array(q)
 
     @q_real.setter
     def q_real(self, q: np.ndarray):
         """Set from a q vector in the real robot convention (length is 32, order same as config.joint_names))."""
-        self.set_joint_positions(self.config.joint_names, q)
+        self.set_joint_positions(self.joint_names, q)
 
     def q_real2pink(self, q: np.ndarray):
         """Convert q vector from real robot convention to pink convention."""
         q_pink = self.configuration.q.copy()
-        for name, value in zip(self.config.joint_names, q, strict=True):
+        for name, value in zip(self.joint_names, q, strict=True):
             q_pink[self.get_idx_q_from_name(name)] = value
         return q_pink
 
     def q_pink2real(self, q: np.ndarray):
         """Convert q vector from pink convention to real robot convention."""
         q_real = []
-        for name in self.config.joint_names:
+        for name in self.joint_names:
             q_real.append(q[self.get_idx_q_from_name(name)])
         return np.array(q_real)
+
+    def dq_pink2real(self, dq_pin: np.ndarray):
+        """Convert dq vector from pinocchio convention to real robot convention."""
+        dq_real = []
+        for name in self.joint_names:
+            if name in self.disabled_joint_names:
+                dq_real.append(0.0)
+            else:
+                dq_real.append(dq_pin[self.get_idx_v_from_name(name)])
+        return np.array(dq_real)
+        
+    def dq_real2pink(self, dq_real: np.ndarray):
+        """Convert dq vector from real robot convention to pinocchio convention."""
+        dq_pin = self.configuration.data.dq_after.copy()
+        for name, value in zip(self.joint_names, dq_real, strict=True):
+            if name in self.disabled_joint_names:
+                continue
+            dq_pin[self.get_idx_v_from_name(name)] = value
+        return dq_pin
 
     def get_joint_by_name(self, name: str):
         """Get joint object by its name."""
         try:
-            joint_id = self.model.getJointId(name)
-            joint = self.model.joints[joint_id]
+            joint_id = self.full_model.getJointId(name)
+            joint = self.full_model.joints[joint_id]
             return joint
         except IndexError as err:
             raise IndexError(f"Joint {name} not found in robot model") from err

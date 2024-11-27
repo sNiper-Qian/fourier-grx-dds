@@ -16,8 +16,7 @@ Run:
 
 ```bash
 sudo apt install libtinyxml2-6a
-pip install fourier-grx-dds==0.1.2b0
-
+pip install fourier-grx-dds
 ```
 
 #### Install from source
@@ -35,9 +34,18 @@ source configure.sh
 source ~/.bashrc
 ```
 
-
 ## Usage
 
-Please read the [Tutorial](tutorial.ipynb) for a step-by-step guide on how to get started and use the interfaces.
+Please read the [Tutorial](tutorial.ipynb) for a more detailed step-by-step guide on how to get started and use the interfaces.
 
 Demo scripts can be found in the [examples](examples/) directory.
+
+#### A Tiny Example
+Start the DDS bridge:
+```bash
+BRIDGE_CONFIG_FILE=configs/dds/config.gr1.json fftai_dds_bridge
+```
+Run a simple script, which lets robot arms move to a target position and move towards it again using inverse kinematics:
+```bash
+python examples/run.py --config configs/gr1_upper_body.yaml
+```

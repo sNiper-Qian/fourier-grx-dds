@@ -36,10 +36,7 @@ def main() -> None:
     time.sleep(1)
     # Move the arms back to the initial position
     controller.move_joints(GR1ControlGroup.UPPER, [0.0]*14, duration=2.0)
-    # Set the gains of the right elbow pitch joint to 0
-    # It is now supposed to be a free joint
-    controller.set_gains([0], [0], [0], joint_names=["right_elbow_pitch_joint"])
-    time.sleep(3)
+    time.sleep(1)
     # Disable all of the motors
     controller.disable()
     # Destroy the controller

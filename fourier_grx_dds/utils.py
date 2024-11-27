@@ -1,6 +1,7 @@
 from enum import Enum
 from dataclasses import dataclass
 import numpy as np
+from enum import IntEnum
 
 class BaseControlGroup(tuple, Enum):
     """Base class for control group enumerations."""
@@ -9,6 +10,11 @@ class BaseControlGroup(tuple, Enum):
     def slice(self):
         """Returns a slice object representing the range of indices for the control group."""
         return slice(self.value[0], self.value[0] + self.value[1])
+    
+    @property
+    def list(self):
+        """Returns a list of indices for the control group."""
+        return list(range(self.value[0], self.value[0] + self.value[1]))
 
     @property
     def num_joints(self):
@@ -51,7 +57,7 @@ class Trajectory:
     def finished(self, t: float):
         return t >= self.duration
 
-class MotorOperationMode:
+class ControlMode(IntEnum):
     """Motor operation mode enumeration."""
     POSITION = 0x01
     VELOCITY = 0x03

@@ -1,15 +1,19 @@
 from pathlib import Path
-from fourier_grx_dds.utils import BaseControlGroup, GR1ControlGroup, GR2ControlGroup, Trajectory
-from fourier_grx_dds.state_machine import DDSPipeline
 from loguru import logger
 from omegaconf import OmegaConf
-from fourier_grx_dds.pydds.parallel_joints_solver import PoseSolver
+
 import os
 import numpy as np
 import time
+import threading
+
 from fourier_grx_dds.exceptions import FourierValueError
 from fourier_grx_dds.kinematics import KinematicsSolver
-import threading
+from fourier_grx_dds.gravity_compensation import GravityCompensation, Upsampler
+from fourier_grx_dds.utils import BaseControlGroup, GR1ControlGroup, GR2ControlGroup, Trajectory
+from fourier_grx_dds.state_machine import DDSPipeline
+from fourier_grx_dds.utils import ControlMode
+from fourier_grx_dds.pydds.parallel_joints_solver import PoseSolver
 
 class RobotController:
     def __init__(self, 
@@ -60,7 +64,8 @@ class RobotController:
                                             pvc_states)
         self._abort_event = threading.Event()
         self._move_lock = threading.Lock()
-    
+        self.gc = GravityCompensation(self, target_hz=self.config.get("target_hz", 500))
+        
     def init_encoders(self):
         """Initialize the encoders state."""
         encoders_state, integrality = self.connector.get_encoders_state()
@@ -94,6 +99,18 @@ class RobotController:
         return np.deg2rad(all_current_pos_deg)
     
     @property
+    def joint_velocities(self):
+        """Get the current joint velocities of the robot. The joint velocities are in radians/s."""
+        pvc_states, pvc_integrality = self.connector.get_pvc_states()
+        assert pvc_integrality, f"Get all motor PVC states failed."
+        joints_realtime_pose_angle = {key: pvc_states[key].position for key in pvc_states}
+        joints_velocity            = {key: pvc_states[key].velocity for key in pvc_states}
+        joints_current             = {key: pvc_states[key].current  for key in pvc_states}
+        joints_pose, joints_velocity, joints_kinetic = self.default_pose_solver_.solve(joints_realtime_pose_angle, joints_velocity, joints_current)
+        all_current_vel_deg = joints_velocity
+        return np.deg2rad(all_current_vel_deg)
+    
+    @property
     def num_joints(self):
         """Get the number of joints."""
         return len(self.joint_names)
@@ -116,6 +133,37 @@ class RobotController:
             self.connector.enable_joints()
         else:
             self.connector.disable_joints()
+    
+    def set_control_mode(self, joint_name: str, control_mode: ControlMode | None = None):
+        """Set the control modes for all joints.
+
+        Args:
+            control_mode (ControlMode | list[ControlMode] | None, optional): ControlMode can be PD, VELOCITY, CURRENT. Defaults to None.
+            group (BaseControlGroup | list | str, optional): The group of joints to set the control modes for. Defaults to GR1ControlGroup.ALL.
+        """
+        self.connector.set_control_mode(joint_name, control_mode)
+    
+    def set_control_modes(self, control_mode: ControlMode | list[ControlMode] | None = None):
+        """Set the control modes for all joints.
+
+        Args:
+            control_mode (ControlMode | list[ControlMode] | None, optional): ControlMode can be PD, VELOCITY, CURRENT. Defaults to None.
+            group (BaseControlGroup | list | str, optional): The group of joints to set the control modes for. Defaults to GR1ControlGroup.ALL.
+        """
+        if isinstance(control_mode, ControlMode):
+            out_control_mode = [control_mode] * self.num_joints
+
+        elif isinstance(control_mode, list) and len(control_mode) == self.num_joints:
+            out_control_mode = [mode for mode in control_mode]
+        
+        else:
+            raise FourierValueError(f"Invalid control mode input: {control_mode}")
+        self.connector.set_control_modes(self.joint_names, out_control_mode)
+    
+    def get_control_modes(self):
+        """Get the control modes for all joints."""
+        # TODO: get control modes
+        raise NotImplementedError("Method not implemented.")
     
     def get_group_position(self, group: BaseControlGroup):
         """Get the joint positions of a group."""
@@ -176,6 +224,7 @@ class RobotController:
             duration: float = 0.0,
             degrees: bool = False,
             blocking: bool = True,
+            gravity_compensation: bool = False,
         ):
         """Move in joint space with time duration.
 
@@ -202,6 +251,14 @@ class RobotController:
         target_pos = self.default_pose_solver_.inverse(target_pos) # solve target pose
         current_pos = np.rad2deg(self.joint_positions.copy())
         current_pos = self.default_pose_solver_.inverse(current_pos) # solve current pose
+
+        if gravity_compensation:
+            if not self.gc.enabled:
+                self.gc.enable()
+            self.gc.run(target_pos, enable_track=True)
+        else:
+            if self.gc.enabled:
+                self.gc.disable()
         
         def pos2cmd(pos):
             return [(joint_name, pos[i]) for i, joint_name in enumerate(self.joint_names)]
@@ -231,11 +288,27 @@ class RobotController:
             thread.daemon = True
             thread.start()
     
-    def set_current(self, currents: np.ndarray | list):
+    def set_currents(self, group: BaseControlGroup | list | str, currents: np.ndarray | list):
         """Set the current of the robot."""
+        currents = np.asarray(currents)
+        target_currents = np.zeros(self.num_joints)
+        if isinstance(group, BaseControlGroup):
+            if currents.shape != (group.num_joints,):
+                raise ValueError(f"Invalid joint position shape: {currents.shape}, expected: {(group.num_joints,)}")
+            target_currents[group.slice] = currents
+        elif isinstance(group, list):
+            if len(group) != len(currents):
+                raise ValueError(f"Invalid joint position shape: {currents.shape}, expected: {(len(group),)}")
+            target_currents[group] = currents
+        elif isinstance(group, str):
+            try:
+                target_currents[BaseControlGroup[group.upper()].slice] = currents
+            except KeyError as ex:
+                raise FourierValueError(f"Unknown group name: {group}") from ex
+
         def pos2cmd(currents):
             return [(joint_name, currents[i]) for i, joint_name in enumerate(self.joint_names)]
-        self.connector.set_current(pos2cmd(currents))
+        self.connector.set_current(pos2cmd(target_currents))
     
     def forward_kinematics(self, chain_names: list[str], q: np.ndarray | None = None) -> list[np.ndarray]:
         """Get the end effector pose of the specified chains in base_link frame.

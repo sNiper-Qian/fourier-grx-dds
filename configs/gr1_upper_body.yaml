@@ -30,7 +30,57 @@ named_links:
   head_link: "head_yaw_link"
   left_elbow_pitch_joint: "left_elbow_pitch_joint"
   right_elbow_pitch_joint: "right_elbow_pitch_joint"
+joints_to_lock: ["waist_roll_joint", "head_roll_joint", "waist_yaw_joint", "waist_pitch_joint"] # Locked joints will not involve in the kinematic chain
 
+# Gravity compensation
+target_hz: 500
+impedance_controller:
+  k: [
+      60.0,
+      60.0,
+      60.0,
+      15.0,
+      15.0,
+      15.0,
+      60.0,
+      70.0,
+      70.0,
+      60.0,
+      15.0,
+      15.0,
+      15.0,
+      60.0,
+      70.0,
+      70.0,
+      60.0,
+      15.0,
+      15.0,
+      15.0,
+    ]
+  b: [5.0, 5.0, 5.0, 1.0, 1.0, 1.0, 5.0, 5.0, 5.0, 5.0, 1.0, 1.0, 1.0, 5.0, 5.0, 5.0, 5.0, 1.0, 1.0, 1.0]
+  m: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  max_effort: [
+                50.0,
+                50.0,
+                50.0,
+                50.0,
+                50.0,
+                50.0,
+                50.0,
+                50.0,
+                50.0,
+                50.0,
+                50.0,
+                50.0,
+                50.0,
+                50.0,
+                50.0,
+                50.0,
+                50.0,
+                50.0,
+                50.0,
+                50.0,
+              ]
 # Joint configuration
 joints:
   left_hip_roll_joint:

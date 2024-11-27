@@ -83,6 +83,14 @@ class PositionControlResponseSubscriber:
     def __init__(self, context:Context, topic_name:str, wait_for_matched:bool, wait_timeout_ms:int):
         ...
 
+class CurrentControlRequest:
+    def __init__(self, target:str, position:float):
+        ...
+
+class CurrentControlResponse:
+    def __init__(self, source:str, timestamp:int, status:str, position:float, velocity:float, current:float, current_id:int):
+        ...
+
 class CurrentControlRequestPublisher:
     def __init__(self, context:Context, topic_name:str, wait_for_matched:bool, wait_timeout_ms:int):
         ...
