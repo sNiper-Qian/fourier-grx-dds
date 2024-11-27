@@ -121,12 +121,15 @@ class JointImpedanceSolver:
             pass
 
 class GravityCompensator(RobotController):
-    def __init__(self, cfg_path: Path, dt: float | None = None, target_hz: int = 200):
+    def __init__(self, cfg_path: Path, dt: float | None = None, target_hz: int | None = None):
         """initialize upbody parameters"""
         super().__init__(cfg_path=cfg_path)
         self.config = self.config
         self.ctrl_idx = self.control_group.UPPER_EXTENDED.list
-        self.target_hz = target_hz
+        if target_hz is None:
+            self.target_hz = self.config.get("target_hz", 120)
+        else:
+            self.target_hz = target_hz
         self.joint_names = list(self.config.joints.keys())
 
         self.current_to_torque = [
@@ -296,7 +299,6 @@ class GravityCompensator(RobotController):
         acc: np.ndarray | list| None = None,
         enable_track: bool = False,
     ):
-        # start_time = time.perf_counter()
         p = np.asarray(p) if p is not None else None
         v = np.asarray(v) if v is not None else None
         acc = np.asarray(acc) if acc is not None else None
@@ -313,7 +315,7 @@ class GravityCompensator(RobotController):
                 self.position_history.append((now, p[self.ctrl_idx]))
             else:
                 if now - self.position_history[-1][0] > 1.5 / self.target_hz:  # minimum frequency 
-                    logger.warning(f"[ImpedanceController] The recommended control frequency is above {self.target_hz}.")
+                    # logger.warning(f"[ImpedanceController] The recommended control frequency is above {self.target_hz}.")
                     self.position_history.clear()
                 self.position_history.append((now, p[self.ctrl_idx]))
 
@@ -356,7 +358,6 @@ class GravityCompensator(RobotController):
             )
 
             impedance_torque = self.impedance_solver.get_output(gravity)  # length: 20
-
             # Tracking the desired position trajectory and implementing a simple controller
             impedance_current = [
                 index1 / index2 for index1, index2 in zip(impedance_torque, self.current_to_torque, strict=True)
@@ -365,7 +366,6 @@ class GravityCompensator(RobotController):
                 curr_cmd = np.zeros(32)
                 curr_cmd[self.ctrl_idx] = impedance_current * self.default_pose_solver_.joints_direction[self.ctrl_idx]
                 self.set_currents(self.control_group.ALL, curr_cmd)
-
                 pos_cmd = q_real.copy()
                 pos_cmd[[15, 16, 17, 22, 23, 24, 29, 30, 31]] = p[[15, 16, 17, 22, 23, 24, 29, 30, 31]]
                 super().move_joints(self.control_group.ALL, pos_cmd)

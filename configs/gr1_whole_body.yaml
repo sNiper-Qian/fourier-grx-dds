@@ -33,7 +33,7 @@ named_links:
 joints_to_lock: [] # Locked joints will not involve in the kinematic chain
 
 # Gravity compensation
-target_hz: 500
+target_hz: 120
 impedance_controller:
   k: [
       60.0,
