@@ -1,4 +1,5 @@
 fourier_grx_dds/__pycache__/
+fourier_grx_dds/pydds/__pycache__/
 build/
 develop-eggs/
 dist/
