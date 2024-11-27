@@ -169,8 +169,8 @@ class PIDIMMSetMode(SendOnly):
             super().push(pydds.PIDIMMSetRequest(target, control_position_kp_imm, control_velocity_kp_imm, control_velocity_ki_imm))
 
 class DDSPipeline:
-    def __init__(self, joints:dict, encoders:list, imu:str, freq:int=50, use_imu:bool=False, enabled_joint_names:list=None):
-        self.context    = pydds.Context()
+    def __init__(self, joints:dict, encoders:list, imu:str, freq:int=50, use_imu:bool=False, enabled_joint_names:list=None, domain_id:int=0):
+        self.context    = pydds.Context(domain_id)
         self.joints     = joints
         self.encoder_names = list(encoders.keys())
         self.encoders      = encoders
