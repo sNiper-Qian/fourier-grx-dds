@@ -7,7 +7,7 @@ This is the library for controlling the Fourier GRX robot using DDS communicatio
 For users who have been using fourier-grx-client and those who are new to this library, Please note the following features:
 
 - fourier-grx-dds implements the low-level communication protocol using C++, achieving lower resource occupation and faster control frequency.
-- Most of the methods in fourier-grx-dds follow the same protocol as in Fourier-GRX-Client, making it easy for Fourier-GRX-Client users to switch over.
+- Most of the methods in fourier-grx-dds follow the same protocol as in fourier-grx-client, making it easy for fourier-grx-client users to switch over.
 ## Installation on Ubuntu 20.04
 For installation on Ubuntu 22.04, please check out [22.04](https://github.com/sNiper-Qian/fourier-grx-dds/tree/22.04) branch.
 #### Install from pypi
