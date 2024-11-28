@@ -8,15 +8,15 @@ For users who have been using fourier-grx-client and those who are new to this l
 
 - fourier-grx-dds implements the low-level communication protocol using C++, achieving lower resource occupation and faster control frequency.
 - Most of the methods in fourier-grx-dds follow the same protocol as in Fourier-GRX-Client, making it easy for Fourier-GRX-Client users to switch over.
-## Installation
-
+## Installation on Ubuntu 20.04
+For installation on Ubuntu 22.04, please check out [22.04](https://github.com/sNiper-Qian/fourier-grx-dds/tree/22.04) branch.
 #### Install from pypi
 
 Run:
 
 ```bash
 sudo apt install libtinyxml2-6a
-pip install fourier-grx-dds
+pip install fourier-grx-dds==0.2.3b0
 ```
 
 #### Install from source
@@ -36,7 +36,8 @@ source ~/.bashrc
 
 ## Quick Start
 Start the DDS bridge:
-The Domain ID is an identifier used by the bridge to distinguish different robots on the same network. Ensure that <domain_id> is within the range [0, 232] and unique for each robot. The <domain_id> in the configuration file must match the one specified here.
+The `domain_id` is an identifier used by the bridge to distinguish different robots on the same network. Ensure that `domain_id` is a int number within the range [0, 232] and unique for each robot. The `domain_id` in the configuration file must match the one specified here.
+
 ```bash
 BRIDGE_CONFIG_FILE=configs/dds/config.gr1.json fftai_dds_bridge <domain_id>
 ```
