@@ -36,6 +36,7 @@ source ~/.bashrc
 
 ## Quick Start
 Start the DDS bridge:
+The Domain ID is an identifier used by the bridge to distinguish different robots on the same network. Ensure that <domain_id> is within the range [0, 232] and unique for each robot. The <domain_id> in the configuration file must match the one specified here.
 ```bash
 BRIDGE_CONFIG_FILE=configs/dds/config.gr1.json fftai_dds_bridge <domain_id>
 ```

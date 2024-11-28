@@ -1,60 +1,60 @@
 left_hip_roll_joint_encoder:
   calibration_pose: 92.5048828125
-  poweron_pose: 92.4609375
+  poweron_pose: 51.943359375
   joint_name: left_hip_roll_joint
 left_hip_yaw_joint_encoder:
   calibration_pose: 239.78759765625
-  poweron_pose: 239.8095703125
+  poweron_pose: 148.86474609375
   joint_name: left_hip_yaw_joint
 left_hip_pitch_joint_encoder:
   calibration_pose: 18.91845703125
-  poweron_pose: 18.9404296875
+  poweron_pose: 317.79052734375
   joint_name: left_hip_pitch_joint
 left_knee_pitch_joint_encoder:
   calibration_pose: 172.7490234375
-  poweron_pose: 172.705078125
+  poweron_pose: 249.6533203125
   joint_name: left_knee_pitch_joint
 left_ankle_pitch_joint_encoder:
   calibration_pose: 159.49951171875
-  poweron_pose: 159.521484375
+  poweron_pose: 109.00634765625
   joint_name: left_ankle_pitch_joint
 left_ankle_roll_joint_encoder:
   calibration_pose: 275.29541015625
-  poweron_pose: 275.361328125
+  poweron_pose: 39.22119140625
   joint_name: left_ankle_roll_joint
 right_hip_roll_joint_encoder:
   calibration_pose: 246.73095703125
-  poweron_pose: 246.07177734375
+  poweron_pose: 323.54736328125
   joint_name: right_hip_roll_joint
 right_hip_yaw_joint_encoder:
   calibration_pose: 14.69970703125
-  poweron_pose: 14.69970703125
+  poweron_pose: 85.341796875
   joint_name: right_hip_yaw_joint
 right_hip_pitch_joint_encoder:
   calibration_pose: 235.08544921875
-  poweron_pose: 232.4267578125
+  poweron_pose: 145.65673828125
   joint_name: right_hip_pitch_joint
 right_knee_pitch_joint_encoder:
   calibration_pose: 239.5458984375
-  poweron_pose: 239.91943359375
+  poweron_pose: 324.20654296875
   joint_name: right_knee_pitch_joint
 right_ankle_pitch_joint_encoder:
   calibration_pose: 101.79931640625
-  poweron_pose: 101.79931640625
+  poweron_pose: 167.2998046875
   joint_name: right_ankle_pitch_joint
 right_ankle_roll_joint_encoder:
   calibration_pose: 103.271484375
-  poweron_pose: 103.271484375
+  poweron_pose: 219.8583984375
   joint_name: right_ankle_roll_joint
 waist_yaw_joint_encoder:
   calibration_pose: 323.28369140625
-  poweron_pose: 323.15185546875
+  poweron_pose: 45.06591796875
   joint_name: waist_yaw_joint
 waist_pitch_joint_encoder:
   calibration_pose: 77.98095703125
-  poweron_pose: 78.57421875
+  poweron_pose: 136.42822265625
   joint_name: waist_pitch_joint
 waist_roll_joint_encoder:
   calibration_pose: 355.49560546875
-  poweron_pose: 354.74853515625
+  poweron_pose: 184.72412109375
   joint_name: waist_roll_joint
