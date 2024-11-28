@@ -31,7 +31,7 @@ def main() -> None:
         last = time.time()
         time.sleep(max(1/200 - (time.time() - last), 0))
         controller_gc.move_joints(GR1ControlGroup.ALL, positions=target_position, gravity_compensation=True)
-        if time.time() - start > 5:
+        if time.time() - start > 15:
             break
         k += 1
         # time.sleep(1/500)

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-site_packages_dir=$(python3 -c "import site; print(site.getsitepackages()[0])")
+site_packages_dir=$(python -c "import site; print(site.getsitepackages()[0])")
 
 fourier_grx_dds_libraries="$site_packages_dir/fourier_grx_dds/libraries"
 
@@ -13,5 +13,4 @@ fi
 
 # Set LD_LIBRARY_PATH
 echo "export LD_LIBRARY_PATH=$fourier_grx_dds_libraries:\$LD_LIBRARY_PATH" >> ~/.bashrc
-
-export LD_LIBRARY_PATH=$(python3 -c "import sysconfig; print(sysconfig.get_config_var('LIBDIR'))"):$LD_LIBRARY_PATH
+echo "export LD_LIBRARY_PATH=$(python -c "import sysconfig; print(sysconfig.get_config_var('LIBDIR'))"):\$LD_LIBRARY_PATH" >> ~/.bashrc

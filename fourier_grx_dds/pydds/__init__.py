@@ -6,18 +6,21 @@ LastEditTime: 2024-10-15 08:42:36
 FilePath: /data/robot_system/sim/pydds/__init__.py
 Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 '''
-# fourier_grx_dds/pydds/__init__.py
 
 import os
 import ctypes
 import sys
 
+python_version = sys.version_info
+if python_version.major != 3 or not (8 <= python_version.minor <= 12):
+    raise RuntimeError(f"Unsupported Python version: {python_version.major}.{python_version.minor}")
+    
 # Determine the directory containing this file
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Construct the full path to the shared library
-lib_path_1 = os.path.join(current_dir, 'libpydds.so')
-lib_path_2 = os.path.join(current_dir, 'parallel_joints_solver.so')
+lib_path_1 = os.path.join(current_dir, f'libpydds_py3{python_version.minor}.so')
+lib_path_2 = os.path.join(current_dir, f'parallel_joints_solver_py3{python_version.minor}.so')
 # Load the shared library using ctypes
 try:
     libpydds = ctypes.CDLL(lib_path_1)
@@ -66,6 +69,21 @@ class PVCStateResponseSubscriber:
     def __init__(self, context:Context, topic_name:str, wait_for_matched:bool, wait_timeout_ms:int):
         ...
 
+class CurrentControlRequest:
+    def __init__(self, target:str, position:float):
+        ...
+
+class CurrentControlResponse:
+    def __init__(self, source:str, timestamp:int, status:str, position:float, velocity:float, current:float, current_id:int):
+        ...
+
+class CurrentControlRequestPublisher:
+    def __init__(self, context:Context, topic_name:str, wait_for_matched:bool, wait_timeout_ms:int):
+        ...
+
+class CurrentControlResponseSubscriber:
+    def __init__(self, context:Context, topic_name:str, wait_for_matched:bool, wait_timeout_ms:int):
+        ...
 
 class PositionControlRequest:
     def __init__(self, target:str, position:float):
@@ -80,22 +98,6 @@ class PositionControlRequestPublisher:
         ...
 
 class PositionControlResponseSubscriber:
-    def __init__(self, context:Context, topic_name:str, wait_for_matched:bool, wait_timeout_ms:int):
-        ...
-
-class CurrentControlRequest:
-    def __init__(self, target:str, position:float):
-        ...
-
-class CurrentControlResponse:
-    def __init__(self, source:str, timestamp:int, status:str, position:float, velocity:float, current:float, current_id:int):
-        ...
-
-class CurrentControlRequestPublisher:
-    def __init__(self, context:Context, topic_name:str, wait_for_matched:bool, wait_timeout_ms:int):
-        ...
-
-class CurrentControlResponseSubscriber:
     def __init__(self, context:Context, topic_name:str, wait_for_matched:bool, wait_timeout_ms:int):
         ...
 
@@ -207,5 +209,18 @@ class PIDIMMGetResponseSubscriber:
     def __init__(self, context:Context, topic_name:str, wait_for_matched:bool, wait_timeout_ms:int):
         ...
 
-
-from fourier_grx_dds.pydds.libpydds import *
+if python_version.minor == 8:
+    from fourier_grx_dds.pydds.libpydds_py38 import *
+    from fourier_grx_dds.pydds.parallel_joints_solver_py38 import PoseSolver
+if python_version.minor == 9:
+    from fourier_grx_dds.pydds.libpydds_py39 import *
+    from fourier_grx_dds.pydds.parallel_joints_solver_py39 import PoseSolver
+if python_version.minor == 10:
+    from fourier_grx_dds.pydds.libpydds_py310 import *
+    from fourier_grx_dds.pydds.parallel_joints_solver_py310 import PoseSolver
+if python_version.minor == 11:
+    from fourier_grx_dds.pydds.libpydds_py311 import *
+    from fourier_grx_dds.pydds.parallel_joints_solver_py311 import PoseSolver
+if python_version.minor == 12:
+    from fourier_grx_dds.pydds.libpydds_py312 import *
+    from fourier_grx_dds.pydds.parallel_joints_solver_py312 import PoseSolver
