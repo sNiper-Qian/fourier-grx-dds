@@ -1,3 +1,4 @@
 include fourier_grx_dds/libraries/*
 include fourier_grx_dds/bin/*
-include fourier_grx_dds/pydds/libpydds.so
+include fourier_grx_dds/pydds/libpydds*.so
+include fourier_grx_dds/pydds/parallel_joints_solver*.so

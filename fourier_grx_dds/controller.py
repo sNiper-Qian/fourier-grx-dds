@@ -12,7 +12,7 @@ from fourier_grx_dds.kinematics import KinematicsSolver
 from fourier_grx_dds.utils import BaseControlGroup, GR1ControlGroup, GR2ControlGroup, Trajectory
 from fourier_grx_dds.state_machine import DDSPipeline
 from fourier_grx_dds.utils import ControlMode
-from fourier_grx_dds.pydds.parallel_joints_solver import PoseSolver
+from fourier_grx_dds.pydds import PoseSolver
 
 class RobotController:
     def __init__(self, 
