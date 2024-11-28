@@ -37,7 +37,7 @@ source ~/.bashrc
 ## Quick Start
 Start the DDS bridge:
 ```bash
-BRIDGE_CONFIG_FILE=configs/dds/config.gr1.json fftai_dds_bridge
+BRIDGE_CONFIG_FILE=configs/dds/config.gr1.json fftai_dds_bridge <domain_id>
 ```
 Run a simple script, which lets robot arms move to a target position and move towards it again using inverse kinematics:
 ```bash
