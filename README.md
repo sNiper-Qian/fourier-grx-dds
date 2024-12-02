@@ -9,7 +9,7 @@ For users who have been using fourier-grx-client and those who are new to this l
 - fourier-grx-dds implements the low-level communication protocol using C++, achieving lower resource occupation and faster control frequency.
 - Most of the methods in fourier-grx-dds follow the same protocol as in fourier-grx-client, making it easy for fourier-grx-client users to switch over.
 ## Installation on Ubuntu 22.04
-For installation on Ubuntu 20.04, please check out [main](https://github.com/sNiper-Qian/fourier-grx-dds/tree/main) branch.
+For installation on Ubuntu 20.04, please check out [main](https://github.com/sNiper-Qian/fourier-grx-dds) branch.
 #### Install from pypi
 
 Run:
