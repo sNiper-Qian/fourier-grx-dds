@@ -30,6 +30,7 @@ class RobotController:
         self.robot_type = self.config.robot.upper()
         self.encoders_state_path = Path(self.config.encoders_state_path)
         self.freq = self.config.frequency
+        self.disabled_pose_solver = self.config["disabled_pose_solver"]
         if self.robot_type.startswith("GR1"):
             self.control_group = GR1ControlGroup
         elif self.robot_type.startswith("GR2"):
@@ -62,7 +63,8 @@ class RobotController:
                                             self.encoders_state, 
                                             self.config["encoders"], 
                                             self.config["joints"],
-                                            pvc_states)
+                                            pvc_states,
+                                            disabled_pose_solver=self.disabled_pose_solver,)
         self._abort_event = threading.Event()
         self._move_lock = threading.Lock()
         

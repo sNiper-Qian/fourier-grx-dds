@@ -39,11 +39,11 @@ Start the DDS bridge:
 The `domain_id` is an identifier used by the bridge to distinguish different robots on the same network. Ensure that `domain_id` is a int number within the range [0, 232] and unique for each robot. The `domain_id` in the configuration file must match the one specified here.
 
 ```bash
-BRIDGE_CONFIG_FILE=configs/dds/config.gr1.json fftai_dds_bridge <domain_id>
+BRIDGE_CONFIG_FILE=configs/dds/config.gr1t2.json fftai_dds_bridge <domain_id>
 ```
 Run a simple script, which lets robot arms move to a target position and move towards it again using inverse kinematics:
 ```bash
-python examples/run.py --config configs/gr1_upper_body.yaml
+python examples/run.py --config configs/gr1t2_upper_body.yaml
 ```
 
 ## Usage
