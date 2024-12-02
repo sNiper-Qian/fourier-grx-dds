@@ -1,5 +1,5 @@
 encoders_state_path: configs/encoders_state.yaml
-domain_id: 9
+domain_id: 10
 frequency: 100
 use_imu: false
 robot: gr1t1 
