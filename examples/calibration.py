@@ -9,7 +9,7 @@ class Calibrator:
         self.config = OmegaConf.load(config_path)
         joints = self.config["joints"]
         self.connector = DDSPipeline(
-            joints, self.config["encoders"], self.config["imu"], self.config["frequency"]
+            joints, self.config["encoders"], self.config["imu"]
         )
 
     def init_encoders(self):

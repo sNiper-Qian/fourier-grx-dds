@@ -52,7 +52,7 @@ def main() -> None:
                             0.17893611111972085  
                         ]
     arm_position = left_arm_position + right_arm_position
-    controller.move_joints(GR1ControlGroup.UPPER, arm_position, duration=2.0)  
+    controller.move_joints(controller.control_group.UPPER, arm_position, duration=2.0)  
     # Disable all of the motors
     controller.disable()
     # Destroy the controller

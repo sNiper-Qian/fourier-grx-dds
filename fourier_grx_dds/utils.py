@@ -42,8 +42,17 @@ class GR1ControlGroup(BaseControlGroup):
 
 class GR2ControlGroup(BaseControlGroup):
     """GR2 Control group enumeration. Each group is a tuple of (start, num_joints). Available groups are: ALL, LEFT_LEG, RIGHT_LEG, WAIST, HEAD, LEFT_ARM, RIGHT_ARM, LOWER, UPPER, UPPER_EXTENDED."""
-    # TODO: Implement GR2 control groups
-    pass
+    
+    ALL = (0, 29)
+    LEFT_LEG = (0, 6)
+    RIGHT_LEG = (6, 6)
+    WAIST = (12, 1)
+    HEAD = (13, 2)
+    LEFT_ARM = (15, 7)
+    RIGHT_ARM = (22, 7)
+    LOWER = (0, 15)
+    UPPER = (15, 14)
+    UPPER_EXTENDED = (12, 17)
 
 @dataclass
 class Trajectory:

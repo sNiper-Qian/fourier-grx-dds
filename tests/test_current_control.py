@@ -16,9 +16,9 @@ def main() -> None:
     # controller.set_control_mode("right_wrist_yaw_joint", ControlMode.CURRENT)
     controller.set_control_modes([ControlMode.CURRENT]*32)
     currents = [0, 0, 0, 0, 0.3, 0, 0]
-    controller.set_currents(GR1ControlGroup.LEFT_ARM, currents)
+    controller.set_currents(controller.control_group.LEFT_ARM, currents)
     time.sleep(0.5)
-    controller.set_currents(GR1ControlGroup.LEFT_ARM, [0.0]*7)
+    controller.set_currents(controller.control_group.LEFT_ARM, [0.0]*7)
     # Disable all of the motors
     controller.disable()
     # Destroy the controller
