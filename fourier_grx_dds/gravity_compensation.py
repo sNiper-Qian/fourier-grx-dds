@@ -121,10 +121,9 @@ class JointImpedanceSolver:
             pass
 
 class GravityCompensator(RobotController):
-    def __init__(self, cfg_path: Path, dt: float | None = None, target_hz: int | None = None):
+    def __init__(self, cfg: Path | DictConfig | str, dt: float | None = None, target_hz: int | None = None):
         """initialize upbody parameters"""
-        super().__init__(cfg_path=cfg_path)
-        self.config = self.config
+        super().__init__(cfg=cfg)
         self.ctrl_idx = self.control_group.UPPER_EXTENDED.list
         if target_hz is None:
             self.target_hz = self.config.get("target_hz", 120)
@@ -132,36 +131,38 @@ class GravityCompensator(RobotController):
             self.target_hz = target_hz
         self.joint_names = list(self.config.joints.keys())
 
-        self.current_to_torque = [
-            2.68,
-            2.68,
-            2.68,
-            1.0,
-            1.0,
-            1.0,
-            5.46,
-            5.46,
-            6.828,
-            6.828,
-            1,
-            1,
-            1,
-            5.46,
-            5.46,
-            6.828,
-            6.828,
-            1,
-            1,
-            1,
-        ]
         self.config = self.config.get("impedance_controller", {})
         self.position_history = deque(maxlen=20)
         self.dt = dt
 
         self.enabled = False
         order = 2
-        dim = 20
-        k = np.array(
+        ##############################GR1################################
+        if self.robot_type.startswith("GR1"):
+            dim = 20
+            self.current_to_torque = [
+                2.68,
+                2.68,
+                2.68,
+                1.0,
+                1.0,
+                1.0,
+                5.46,
+                5.46,
+                6.828,
+                6.828,
+                1,
+                1,
+                1,
+                5.46,
+                5.46,
+                6.828,
+                6.828,
+                1,
+                1,
+                1,
+            ]
+            k = np.array(
             self.config.get(
                 "k",
                 [
@@ -187,46 +188,129 @@ class GravityCompensator(RobotController):
                     15.0,
                 ],
             )
-        )
-        b = np.array(
+            )
+            b = np.array(
             self.config.get(
                 "b",
                 [5.0, 5.0, 5.0, 1.0, 1.0, 1.0, 5.0, 5.0, 5.0, 5.0, 1.0, 1.0, 1.0, 5.0, 5.0, 5.0, 5.0, 1.0, 1.0, 1.0],
             )
-        )
-        m = np.array(
-            self.config.get(
-                "m",
-                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
             )
-        )
-        max_effort = np.array(
+            m = np.array(
+                self.config.get(
+                    "m",
+                    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                )
+            )
+            max_effort = np.array(
+                self.config.get(
+                    "max_effort",
+                    [
+                        50.0,
+                        50.0,
+                        50.0,
+                        50.0,
+                        50.0,
+                        50.0,
+                        50.0,
+                        50.0,
+                        50.0,
+                        50.0,
+                        50.0,
+                        50.0,
+                        50.0,
+                        50.0,
+                        50.0,
+                        50.0,
+                        50.0,
+                        50.0,
+                        50.0,
+                        50.0,
+                    ],
+                )
+            )
+        ##############################GR2################################
+        elif self.robot_type.startswith("GR2"):
+            dim = 17
+            self.current_to_torque = [
+                2.68,
+                1.0,
+                1.0,
+                5.46,
+                5.46,
+                6.828,
+                6.828,
+                1,
+                1,
+                1,
+                5.46,
+                5.46,
+                6.828,
+                6.828,
+                1,
+                1,
+                1,
+            ]
+            k = np.array(
             self.config.get(
-                "max_effort",
+                "k",
                 [
-                    50.0,
-                    50.0,
-                    50.0,
-                    50.0,
-                    50.0,
-                    50.0,
-                    50.0,
-                    50.0,
-                    50.0,
-                    50.0,
-                    50.0,
-                    50.0,
-                    50.0,
-                    50.0,
-                    50.0,
-                    50.0,
-                    50.0,
-                    50.0,
-                    50.0,
-                    50.0,
+                    60.0,
+                    15.0,
+                    15.0,
+                    60.0,
+                    70.0,
+                    70.0,
+                    60.0,
+                    15.0,
+                    15.0,
+                    15.0,
+                    60.0,
+                    70.0,
+                    70.0,
+                    60.0,
+                    15.0,
+                    15.0,
+                    15.0,
                 ],
             )
-        )
+            )
+            b = np.array(
+            self.config.get(
+                "b",
+                [5.0, 1.0, 1.0, 5.0, 5.0, 5.0, 5.0, 1.0, 1.0, 1.0, 5.0, 5.0, 5.0, 5.0, 1.0, 1.0, 1.0],
+            )
+            )
+            m = np.array(
+                self.config.get(
+                    "m",
+                    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                )
+            )
+            max_effort = np.array(
+                self.config.get(
+                    "max_effort",
+                    [
+                        50.0,
+                        50.0,
+                        50.0,
+                        50.0,
+                        50.0,
+                        50.0,
+                        50.0,
+                        50.0,
+                        50.0,
+                        50.0,
+                        50.0,
+                        50.0,
+                        50.0,
+                        50.0,
+                        50.0,
+                        50.0,
+                        50.0,
+                    ],
+                )
+            )
+       
         self.impedance_solver = JointImpedanceSolver(order, dim, k, b, m, max_effort)
 
     def enable_gc(self):
@@ -268,15 +352,26 @@ class GravityCompensator(RobotController):
         """Set the control mode and corresponding PID parameters"""
 
         # self._record_origin_control_config()
-        control_mode = (
-            [ControlMode.POSITION] * (32 - len(self.ctrl_idx))
-            + [ControlMode.CURRENT] * 3
-            + [ControlMode.POSITION] * 3
-            + [ControlMode.CURRENT] * 4
-            + [ControlMode.POSITION] * 3
-            + [ControlMode.CURRENT] * 4
-            + [ControlMode.POSITION] * 3
-        )  # set lower as none and upbody as PD
+        if self.robot_type.startswith("GR1"):
+            control_mode = (
+                [ControlMode.POSITION] * (self.num_joints - len(self.ctrl_idx))
+                + [ControlMode.CURRENT] * 3
+                + [ControlMode.POSITION] * 3
+                + [ControlMode.CURRENT] * 4
+                + [ControlMode.POSITION] * 3
+                + [ControlMode.CURRENT] * 4
+                + [ControlMode.POSITION] * 3
+            )  # set lower as none and upbody as PD
+        elif self.robot_type.startswith("GR2"):
+            control_mode = (
+                [ControlMode.POSITION] * (self.num_joints - len(self.ctrl_idx))
+                + [ControlMode.CURRENT] * 1
+                + [ControlMode.POSITION] * 2
+                + [ControlMode.CURRENT] * 4
+                + [ControlMode.POSITION] * 3
+                + [ControlMode.CURRENT] * 4
+                + [ControlMode.POSITION] * 3
+            )  # set lower as none and upbody as PD
         self.set_control_modes(control_mode)
     
     def pause(self):
@@ -339,7 +434,7 @@ class GravityCompensator(RobotController):
 
         q_pin = self.kinematics_solver.q_real2pink(q_real)
 
-        gravity = self.kinematics_solver.dq_pink2real(pin.computeGeneralizedGravity(self.kinematics_solver.model, self.kinematics_solver.data, q_pin))[-20:]
+        gravity = self.kinematics_solver.dq_pink2real(pin.computeGeneralizedGravity(self.kinematics_solver.model, self.kinematics_solver.data, q_pin))[-len(self.ctrl_idx):]
         if enable_track is True and p is not None:
             # if p is None:
             #     p = np.zeros(len(self.ctrl_idx))  # rad, length = 20
@@ -363,11 +458,14 @@ class GravityCompensator(RobotController):
                 index1 / index2 for index1, index2 in zip(impedance_torque, self.current_to_torque, strict=True)
             ]
             try:
-                curr_cmd = np.zeros(32)
+                curr_cmd = np.zeros(self.num_joints)
                 curr_cmd[self.ctrl_idx] = impedance_current * self.default_pose_solver_.joints_direction[self.ctrl_idx]
                 self.set_currents(self.control_group.ALL, curr_cmd)
                 pos_cmd = q_real.copy()
-                pos_cmd[[15, 16, 17, 22, 23, 24, 29, 30, 31]] = p[[15, 16, 17, 22, 23, 24, 29, 30, 31]]
+                if self.robot_type.startswith("GR1"):
+                    pos_cmd[[15, 16, 17, 22, 23, 24, 29, 30, 31]] = p[[15, 16, 17, 22, 23, 24, 29, 30, 31]]
+                elif self.robot_type.startswith("GR2"):
+                    pos_cmd[[13, 14, 19, 20, 21, 26, 27, 28]] = p[[13, 14, 19, 20, 21, 26, 27, 28]]
                 super().move_joints(self.control_group.ALL, pos_cmd)
                 return True
             except Exception as e:
