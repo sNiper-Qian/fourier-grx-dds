@@ -1,5 +1,5 @@
 encoders_state_path: configs/encoders_state.yaml
-domain_id: 10
+domain_id: 111
 topic_prefix: /fftai/gr1t2
 frequency: 100
 use_imu: false
@@ -311,7 +311,7 @@ joints:
     default_pose_degree: 0
     actuator_type: FSA_TYPE_250830
   head_roll_joint:
-    enable: false
+    enable: true
     direction: -1
     initialization_pose_degree: 0
     min_pose_degree: -20.05352282957881

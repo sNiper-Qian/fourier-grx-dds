@@ -15,18 +15,18 @@ def main() -> None:
     controller_gc = GravityCompensator(args.config)
     controller_gc.enable()
     
-    target_position = [0.0]*29
+    target_position = [0.0]*controller_gc.num_joints
     start = time.time()
     k = 0
     last = time.time()
     while True:
-        target_position[15] = -(0.3 * math.sin(0.01 * k - math.pi / 2) + 0.3)
-        target_position[16] = (0.3 * math.sin(0.01 * k - math.pi / 2) + 0.3)
-        target_position[17] = (0.3 * math.sin(0.01 * k - math.pi / 2) + 0.3)
-        target_position[18] = -(0.3 * math.sin(0.01 * k - math.pi / 2) + 0.3)
-        target_position[19] = -(0.3 * math.sin(0.01 * k - math.pi / 2) + 0.3)
-        target_position[20] = -(0.3 * math.sin(0.01 * k - math.pi / 2) + 0.3)
-        target_position[21] = -(0.3 * math.sin(0.01 * k - math.pi / 2) + 0.3)
+        target_position[controller_gc.control_group.LEFT_ARM.value[0]+0] = -(0.3 * math.sin(0.01 * k - math.pi / 2) + 0.3)
+        target_position[controller_gc.control_group.LEFT_ARM.value[0]+1] = (0.3 * math.sin(0.01 * k - math.pi / 2) + 0.3)
+        target_position[controller_gc.control_group.LEFT_ARM.value[0]+2] = (0.3 * math.sin(0.01 * k - math.pi / 2) + 0.3)
+        target_position[controller_gc.control_group.LEFT_ARM.value[0]+3] = -(0.3 * math.sin(0.01 * k - math.pi / 2) + 0.3)
+        target_position[controller_gc.control_group.LEFT_ARM.value[0]+4] = -(0.3 * math.sin(0.01 * k - math.pi / 2) + 0.3)
+        target_position[controller_gc.control_group.LEFT_ARM.value[0]+5] = -(0.3 * math.sin(0.01 * k - math.pi / 2) + 0.3)
+        target_position[controller_gc.control_group.LEFT_ARM.value[0]+6] = -(0.3 * math.sin(0.01 * k - math.pi / 2) + 0.3)
         print("Control Frequency: ", 1/(time.time() - last))
         last = time.time()
         time.sleep(max(1/200 - (time.time() - last), 0))

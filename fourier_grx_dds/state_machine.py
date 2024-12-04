@@ -189,11 +189,11 @@ class DDSPipeline:
                  use_imu:bool=False, enabled_joint_names:list=None, domain_id:int=0, topic_prefix="fftai/gr1t2"):
         self.context    = pydds.Context(domain_id)
         self.joints     = joints
+        self.encoders   = encoders
         if encoders:
             self.encoder_names = [encoder_name for encoder_name in self.encoders if self.encoders[encoder_name]["enable"]]
         else:
             self.encoder_names = []
-        self.encoders      = encoders
         self.imu_name      = imu
         self.use_imu        = use_imu
         self.topic_prefix  = topic_prefix
