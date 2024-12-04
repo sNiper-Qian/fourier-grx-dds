@@ -14,11 +14,10 @@ def main() -> None:
     controller = RobotController(args.config)
     controller.enable()
     # Test each joint on head
-    
-    head_position = [0.0, 0.0, 0.0]
-    for i in range(3):
+    head_position = [0.0] * controller.control_group.HEAD.num_joints
+    for i in range(controller.control_group.HEAD.num_joints):
         head_position[i] = 0.5
-        controller.move_joints(GR1ControlGroup.HEAD, head_position, duration=2.0)
+        controller.move_joints(controller.control_group.HEAD, head_position, duration=2.0)
         
     controller.disable()
     # Destroy the controller

@@ -2,7 +2,7 @@
 A simple example to demonstrate the usage of the robot controller.
 '''
 import argparse
-from fourier_grx_dds.utils import GR1ControlGroup, ControlMode
+from fourier_grx_dds.utils import GR1ControlGroup, ControlMode, GR2ControlGroup
 from fourier_grx_dds.gravity_compensation import GravityCompensator, Upsampler
 import time
 import math
@@ -15,22 +15,22 @@ def main() -> None:
     controller_gc = GravityCompensator(args.config)
     controller_gc.enable()
     
-    target_position = [0.0]*32
+    target_position = [0.0]*controller_gc.num_joints
     start = time.time()
     k = 0
     last = time.time()
     while True:
-        target_position[18] = -(0.3 * math.sin(0.01 * k - math.pi / 2) + 0.3)
-        target_position[19] = (0.3 * math.sin(0.01 * k - math.pi / 2) + 0.3)
-        target_position[20] = (0.3 * math.sin(0.01 * k - math.pi / 2) + 0.3)
-        target_position[21] = -(0.3 * math.sin(0.01 * k - math.pi / 2) + 0.3)
-        target_position[22] = -(0.3 * math.sin(0.01 * k - math.pi / 2) + 0.3)
-        target_position[23] = -(0.3 * math.sin(0.01 * k - math.pi / 2) + 0.3)
-        target_position[24] = -(0.3 * math.sin(0.01 * k - math.pi / 2) + 0.3)
+        target_position[controller_gc.control_group.LEFT_ARM.value[0]+0] = -(0.3 * math.sin(0.01 * k - math.pi / 2) + 0.3)
+        target_position[controller_gc.control_group.LEFT_ARM.value[0]+1] = (0.3 * math.sin(0.01 * k - math.pi / 2) + 0.3)
+        target_position[controller_gc.control_group.LEFT_ARM.value[0]+2] = (0.3 * math.sin(0.01 * k - math.pi / 2) + 0.3)
+        target_position[controller_gc.control_group.LEFT_ARM.value[0]+3] = -(0.3 * math.sin(0.01 * k - math.pi / 2) + 0.3)
+        target_position[controller_gc.control_group.LEFT_ARM.value[0]+4] = -(0.3 * math.sin(0.01 * k - math.pi / 2) + 0.3)
+        target_position[controller_gc.control_group.LEFT_ARM.value[0]+5] = -(0.3 * math.sin(0.01 * k - math.pi / 2) + 0.3)
+        target_position[controller_gc.control_group.LEFT_ARM.value[0]+6] = -(0.3 * math.sin(0.01 * k - math.pi / 2) + 0.3)
         print("Control Frequency: ", 1/(time.time() - last))
         last = time.time()
         time.sleep(max(1/200 - (time.time() - last), 0))
-        controller_gc.move_joints(GR1ControlGroup.ALL, positions=target_position, gravity_compensation=True)
+        controller_gc.move_joints(controller_gc.control_group.ALL, positions=target_position, gravity_compensation=True)
         if time.time() - start > 15:
             break
         k += 1

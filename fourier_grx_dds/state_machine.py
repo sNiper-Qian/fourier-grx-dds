@@ -12,13 +12,14 @@ from enum import IntEnum
 from fourier_grx_dds.utils import ControlMode
 
 class StateMachine:
-    def __init__(self, dds_context, targets):
+    def __init__(self, dds_context, targets, topic_prefix="fftai/gr1t2"):
         self.dds_context = dds_context
         self.targets     = targets
         self.request_messages = dict()
         self.subscriber = self.make_subscriber(dds_context)
         for target in self.targets:
             self.request_messages[target] = self.make_message(target)
+        self.topic_prefix = topic_prefix
 
     def get_name(self):
         return "StateMachine"
@@ -36,30 +37,39 @@ class StateMachine:
         return states
 
 class PVCStateMachine(StateMachine):
+    def __init__(self, dds_context, targets, topic_prefix="fftai/gr1t2"):
+        self.topic_prefix = topic_prefix
+        super().__init__(dds_context, targets, topic_prefix=topic_prefix)
+
     def get_name(self):
         return "PVCState"
 
     def make_subscriber(self, dds_context):
-        return pydds.PVCStateResponseSubscriber(dds_context, "/fftai/gr1t2/pvc_state/response", True, 5000)
+        return pydds.PVCStateResponseSubscriber(dds_context, f"{self.topic_prefix}/pvc_state/response", True, 5000)
 
     def make_message(self, target):
         return pydds.PVCStateRequest(target, True, True, True)
 
 class IMUStateMachine(StateMachine):
+    def __init__(self, dds_context, targets, topic_prefix="fftai/gr1t2"):
+        self.topic_prefix = topic_prefix
+        super().__init__(dds_context, targets, topic_prefix=topic_prefix)
+
     def get_name(self):
         return "IMUState"
     
     def make_subscriber(self, dds_context):
-        return pydds.IMUStateResponseSubscriber(dds_context, "/fftai/gr1t2/imu_state/response", True, 5000)
+        return pydds.IMUStateResponseSubscriber(dds_context, f"{self.topic_prefix}/imu_state/response", True, 5000)
 
     def make_message(self, target):
         return pydds.IMUStateRequest(target)
 
 class SendOnly:
-    def __init__(self, publisher, subscriber):
+    def __init__(self, publisher, subscriber, topic_prefix="fftai/gr1t2"):
         self.messages   = dict()
         self.publisher  = publisher
         self.subscriber = subscriber
+        self.topic_prefix = topic_prefix
 
     def push(self, message):
         self.messages[message.target] = message
@@ -85,10 +95,11 @@ class SendOnly:
             self.publisher.publish(messages[target])
 
 class MotorControl(SendOnly):
-    def __init__(self, dds_context):
+    def __init__(self, dds_context, topic_prefix="fftai/gr1t2"):
         super().__init__(
-            pydds.MotorControlRequestPublisher(dds_context, "/fftai/gr1t2/motor_control/request", True, 5000), 
-            pydds.MotorControlResponseSubscriber(dds_context, "/fftai/gr1t2/motor_control/response", True, 5000)
+            pydds.MotorControlRequestPublisher(dds_context, f"{topic_prefix}/motor_control/request", True, 5000), 
+            pydds.MotorControlResponseSubscriber(dds_context, f"{topic_prefix}/motor_control/response", True, 5000),
+            topic_prefix=topic_prefix
         )
     
     def push(self, target, control_word):
@@ -99,10 +110,11 @@ class MotorControl(SendOnly):
             super().push(pydds.MotorControlRequest(target, control_word))
 
 class Encoder(SendOnly):
-    def __init__(self, dds_context):
+    def __init__(self, dds_context, topic_prefix="fftai/gr1t2"):
         super().__init__(
-            pydds.EncoderStateRequestPublisher(dds_context, "/fftai/gr1t2/encoder_state/request", True, 5000),
-            pydds.EncoderStateResponseSubscriber(dds_context, "/fftai/gr1t2/encoder_state/response", True, 5000)
+            pydds.EncoderStateRequestPublisher(dds_context, f"{topic_prefix}/encoder_state/request", True, 5000),
+            pydds.EncoderStateResponseSubscriber(dds_context, f"{topic_prefix}/encoder_state/response", True, 5000),
+            topic_prefix=topic_prefix
         )
     
     def push(self, target):
@@ -113,10 +125,11 @@ class Encoder(SendOnly):
             super().push(pydds.EncoderStateRequest(target))
 
 class OperationMode(SendOnly):
-    def __init__(self, dds_context):
+    def __init__(self, dds_context, topic_prefix="fftai/gr1t2"):
         super().__init__(
-            pydds.OperationModeRequestPublisher(dds_context, "/fftai/gr1t2/operation_mode/request", True, 5000), 
-            pydds.OperationModeResponseSubscriber(dds_context, "/fftai/gr1t2/operation_mode/response", True, 5000)
+            pydds.OperationModeRequestPublisher(dds_context, f"{topic_prefix}/operation_mode/request", True, 5000), 
+            pydds.OperationModeResponseSubscriber(dds_context, f"{topic_prefix}/operation_mode/response", True, 5000),
+            topic_prefix=topic_prefix
         )
 
     def push(self, target, mode_of_operation):
@@ -127,10 +140,11 @@ class OperationMode(SendOnly):
             super().push(pydds.OperationModeRequest(target, mode_of_operation))
 
 class PositionControlMode(SendOnly):
-    def __init__(self, dds_context):
+    def __init__(self, dds_context, topic_prefix="fftai/gr1t2"):
         super().__init__(
-            pydds.PositionControlRequestPublisher(dds_context, "/fftai/gr1t2/position_control/request", True, 5000), 
-            pydds.PositionControlResponseSubscriber(dds_context, "/fftai/gr1t2/position_control/response", True, 5000)
+            pydds.PositionControlRequestPublisher(dds_context, f"{topic_prefix}/position_control/request", True, 5000), 
+            pydds.PositionControlResponseSubscriber(dds_context, f"{topic_prefix}/position_control/response", True, 5000),
+            topic_prefix=topic_prefix
         )
 
     def push(self, target, pos):
@@ -141,10 +155,11 @@ class PositionControlMode(SendOnly):
             super().push(pydds.PositionControlRequest(target, pos))
 
 class CurrentControlMode(SendOnly):
-    def __init__(self, dds_context):
+    def __init__(self, dds_context, topic_prefix="fftai/gr1t2"):
         super().__init__(
-            pydds.CurrentControlRequestPublisher(dds_context, "/fftai/gr1t2/current_control/request", True, 5000), 
-            pydds.CurrentControlResponseSubscriber(dds_context, "/fftai/gr1t2/current_control/response", True, 5000)
+            pydds.CurrentControlRequestPublisher(dds_context, f"{topic_prefix}/current_control/request", True, 5000), 
+            pydds.CurrentControlResponseSubscriber(dds_context, f"{topic_prefix}/current_control/response", True, 5000),
+            topic_prefix=topic_prefix
         )
 
     def push(self, target, pos):
@@ -155,10 +170,11 @@ class CurrentControlMode(SendOnly):
             super().push(pydds.CurrentControlRequest(target, pos))
 
 class PIDIMMSetMode(SendOnly):
-    def __init__(self, dds_context):
+    def __init__(self, dds_context, topic_prefix="fftai/gr1t2"):
         super().__init__(
-            pydds.PIDIMMSetRequestPublisher(dds_context, "/fftai/gr1t2/pid_imm_set/request", True, 5000), 
-            pydds.PIDIMMSetResponseSubscriber(dds_context, "/fftai/gr1t2/pid_imm_set/response", True, 5000)
+            pydds.PIDIMMSetRequestPublisher(dds_context, f"{topic_prefix}/pid_imm_set/request", True, 5000), 
+            pydds.PIDIMMSetResponseSubscriber(dds_context, f"{topic_prefix}/pid_imm_set/response", True, 5000),
+            topic_prefix=topic_prefix
         )
 
     def push(self, target, control_position_kp_imm, control_velocity_kp_imm, control_velocity_ki_imm):
@@ -169,25 +185,29 @@ class PIDIMMSetMode(SendOnly):
             super().push(pydds.PIDIMMSetRequest(target, control_position_kp_imm, control_velocity_kp_imm, control_velocity_ki_imm))
 
 class DDSPipeline:
-    def __init__(self, joints:dict, encoders:list, imu:str, freq:int=50, use_imu:bool=False, enabled_joint_names:list=None, domain_id:int=0):
+    def __init__(self, joints:dict, encoders:list | None, imu:str,
+                 use_imu:bool=False, enabled_joint_names:list=None, domain_id:int=0, topic_prefix="fftai/gr1t2"):
         self.context    = pydds.Context(domain_id)
         self.joints     = joints
-        self.encoder_names = list(encoders.keys())
-        self.encoders      = encoders
+        self.encoders   = encoders
+        if encoders:
+            self.encoder_names = [encoder_name for encoder_name in self.encoders if self.encoders[encoder_name]["enable"]]
+        else:
+            self.encoder_names = []
         self.imu_name      = imu
         self.use_imu        = use_imu
-        self.freq          = freq
+        self.topic_prefix  = topic_prefix
         self.joint_names      = list(joints.keys())
         self.enabled_joint_names = enabled_joint_names
-        self.encoder_control  = Encoder(self.context)
-        self.motor_control    = MotorControl(self.context)
-        self.operation_mode   = OperationMode(self.context)
-        self.position_control = PositionControlMode(self.context)
-        self.current_control = CurrentControlMode(self.context)
-        self.pidimm_control   = PIDIMMSetMode(self.context)
-        self.pvc_state        = PVCStateMachine(self.context, self.joint_names)
+        self.encoder_control  = Encoder(self.context, self.topic_prefix)
+        self.motor_control    = MotorControl(self.context, self.topic_prefix)
+        self.operation_mode   = OperationMode(self.context, self.topic_prefix)
+        self.position_control = PositionControlMode(self.context, self.topic_prefix)
+        self.current_control = CurrentControlMode(self.context, self.topic_prefix)
+        self.pidimm_control   = PIDIMMSetMode(self.context, self.topic_prefix)
+        self.pvc_state        = PVCStateMachine(self.context, self.joint_names, self.topic_prefix)
         if self.use_imu:
-            self.imu_state    = IMUStateMachine(self.context, [imu])
+            self.imu_state    = IMUStateMachine(self.context, [imu], self.topic_prefix)
         
     def destroy(self):
         if self.use_imu:
@@ -293,6 +313,8 @@ class DDSPipeline:
     def get_encoders_state(self, retry=5):
         integrality = False
         responses   = None
+        if self.encoder_names is []:
+            return responses, True
         while retry >= 0:
             self.encoder_control.pushs(self.encoder_names)
             self.encoder_control.emit()

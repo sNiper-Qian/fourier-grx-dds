@@ -1,5 +1,5 @@
 {
-    "topic_prefix": "/fftai/gr1t1",
+    "topic_prefix": "/fftai/gr2t5",
     "protocol_json_port": 2333,
     "protocol_fastbinary_port": 2335,
     "workers": [
@@ -48,66 +48,6 @@
       }
     ],
     "devices": {
-      "waist_roll_joint_encoder": {
-        "ip": "192.168.137.192",
-        "type": "Encoder"
-      },
-      "waist_pitch_joint_encoder": {
-        "ip": "192.168.137.191",
-        "type": "Encoder"
-      },
-      "waist_yaw_joint_encoder": {
-        "ip": "192.168.137.190",
-        "type": "Encoder"
-      },
-      "left_hip_roll_joint_encoder": {
-        "ip": "192.168.137.170",
-        "type": "Encoder"
-      },
-      "right_hip_roll_joint_encoder": {
-        "ip": "192.168.137.150",
-        "type": "Encoder"
-      },
-      "left_hip_yaw_joint_encoder": {
-        "ip": "192.168.137.171",
-        "type": "Encoder"
-      },
-      "right_hip_yaw_joint_encoder": {
-        "ip": "192.168.137.151",
-        "type": "Encoder"
-      },
-      "left_hip_pitch_joint_encoder": {
-        "ip": "192.168.137.172",
-        "type": "Encoder"
-      },
-      "right_hip_pitch_joint_encoder": {
-        "ip": "192.168.137.152",
-        "type": "Encoder"
-      },
-      "left_knee_pitch_joint_encoder": {
-        "ip": "192.168.137.173",
-        "type": "Encoder"
-      },
-      "right_knee_pitch_joint_encoder": {
-        "ip": "192.168.137.153",
-        "type": "Encoder"
-      },
-      "left_ankle_pitch_joint_encoder": {
-        "ip": "192.168.137.174",
-        "type": "Encoder"
-      },
-      "right_ankle_pitch_joint_encoder": {
-        "ip": "192.168.137.154",
-        "type": "Encoder"
-      },
-      "left_ankle_roll_joint_encoder": {
-        "ip": "192.168.137.175",
-        "type": "Encoder"
-      },
-      "right_ankle_roll_joint_encoder": {
-        "ip": "192.168.137.155",
-        "type": "Encoder"
-      },
       "left_shoulder_pitch_joint": {
         "ip": "192.168.137.10",
         "type": "MotorV2"
@@ -162,14 +102,6 @@
       },
       "right_wrist_pitch_joint": {
         "ip": "192.168.137.36",
-        "type": "MotorV2"
-      },
-      "waist_roll_joint": {
-        "ip": "192.168.137.92",
-        "type": "MotorV2"
-      },
-      "waist_pitch_joint": {
-        "ip": "192.168.137.91",
         "type": "MotorV2"
       },
       "waist_yaw_joint": {
@@ -228,15 +160,10 @@
         "ip": "192.168.137.93",
         "type": "MotorV2"
       },
-      "head_roll_joint": {
-        "ip": "192.168.137.94",
-        "type": "MotorV2"
-      },
       "head_pitch_joint": {
         "ip": "192.168.137.95",
         "type": "MotorV2"
       },
-      
       "Body/IMU": {
         "type": "IMU",
         "serial_port": "/dev/ttyUSB0", 

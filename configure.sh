@@ -20,4 +20,5 @@ echo "# Add fourier-grx-dds lib " >> ~/.bashrc
 echo "export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:/lib:/lib64:\$LD_LIBRARY_PATH" >> ~/.bashrc
 # Set LD_LIBRARY_PATH
 echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$fourier_grx_dds_libraries" >> ~/.bashrc
+
 echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$(python -c "import sysconfig; print(sysconfig.get_config_var('LIBDIR'))")" >> ~/.bashrc

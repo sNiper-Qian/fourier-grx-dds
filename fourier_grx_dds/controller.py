@@ -1,6 +1,6 @@
 from pathlib import Path
 from loguru import logger
-from omegaconf import OmegaConf
+from omegaconf import OmegaConf, DictConfig
 
 import os
 import numpy as np
@@ -16,38 +16,47 @@ from fourier_grx_dds.pydds import PoseSolver
 
 class RobotController:
     def __init__(self, 
-                 cfg_path: Path,
+                 cfg: Path | DictConfig | str
                  ):
         """
         Args:
-            cfg_path (Path): Path to the configuration file.
+            cfg: Path to the configuration file.
         """
-        self.config = OmegaConf.load(cfg_path)
+        if isinstance(cfg, Path | str):
+            self.config = OmegaConf.load(cfg)
+        elif isinstance(cfg, DictConfig):
+            self.config = cfg
+        else:
+            raise FourierValueError(f"Invalid configuration input: {cfg}")
         self.domain_id = self.config.get("domain_id", 0)
         self.joints = self.config.joints
         self.joint_names = list(self.joints.keys())
         self.enabled_joint_names = set([joint_name for joint_name in self.joints if self.joints[joint_name]["enable"]]) # TODO: fix joint names
         self.robot_type = self.config.robot.upper()
-        self.encoders_state_path = Path(self.config.encoders_state_path)
+        
         self.freq = self.config.frequency
         self.disabled_pose_solver = self.config["disabled_pose_solver"]
         if self.robot_type.startswith("GR1"):
             self.control_group = GR1ControlGroup
+            self.encoders_state_path = Path(self.config.encoders_state_path)
         elif self.robot_type.startswith("GR2"):
             self.control_group = GR2ControlGroup
-            raise NotImplementedError("GR2 robot type is not supported yet.")
+            self.encoders_state_path = None # GR2 does not need encoders
         else:
             raise ValueError(f"Unknown robot type: {self.robot_type}")
 
         self.connector = DDSPipeline(self.joints, 
-                                     self.config.encoders, 
+                                     self.config.get("encoders", None), 
                                      self.config.imu, 
-                                     self.config.frequency, 
                                      self.config.use_imu,
                                      self.enabled_joint_names,
                                      domain_id=self.domain_id,
+                                     topic_prefix=self.config.get("topic_prefix", "/fftai/gr1t2"),
                                      )
-        self.init_encoders()
+        if self.robot_type.startswith("GR1"):
+            self.init_encoders()
+        elif self.robot_type.startswith("GR2"):
+            self.encoders_state = {}
         self.connector.set_joints_pid_param()
         logger.info("PID parameters set.")
         time.sleep(1)   
@@ -59,9 +68,10 @@ class RobotController:
         self.init_kinematics_solver()
         
         self.default_pose_solver_  = PoseSolver(
+                                            self.robot_type,
                                             self.joint_names, 
                                             self.encoders_state, 
-                                            self.config["encoders"], 
+                                            self.config.get("encoders", None), 
                                             self.config["joints"],
                                             pvc_states,
                                             disabled_pose_solver=self.disabled_pose_solver,)
@@ -140,8 +150,8 @@ class RobotController:
         """Set the control modes for all joints.
 
         Args:
+            joint_name (str): The name of the joint.
             control_mode (ControlMode | list[ControlMode] | None, optional): ControlMode can be PD, VELOCITY, CURRENT. Defaults to None.
-            group (BaseControlGroup | list | str, optional): The group of joints to set the control modes for. Defaults to GR1ControlGroup.ALL.
         """
         self.connector.set_control_mode(joint_name, control_mode)
     
@@ -150,7 +160,6 @@ class RobotController:
 
         Args:
             control_mode (ControlMode | list[ControlMode] | None, optional): ControlMode can be PD, VELOCITY, CURRENT. Defaults to None.
-            group (BaseControlGroup | list | str, optional): The group of joints to set the control modes for. Defaults to GR1ControlGroup.ALL.
         """
         if isinstance(control_mode, ControlMode):
             out_control_mode = [control_mode] * self.num_joints
@@ -357,7 +366,7 @@ class RobotController:
         self.kinematics_solver.solve(left_target, right_target, head_target, dt)
         q = self.kinematics_solver.get_joint_positions(self.joint_names)
         if move:
-            self.move_joints(GR1ControlGroup.ALL, q, duration=dt/velocity_scaling_factor*100, blocking=True)
+            self.move_joints(self.control_group.ALL, q, duration=dt/velocity_scaling_factor*100, blocking=True)
             self.is_moving = False
         return q
         

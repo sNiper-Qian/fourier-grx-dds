@@ -1,9 +1,11 @@
 encoders_state_path: configs/encoders_state.yaml
 domain_id: 10
+topic_prefix: /fftai/gr1t2
 frequency: 100
 use_imu: false
 robot: gr1t2 
 disabled_pose_solver: []
+
 # Kinematics configuration
 urdf_path: assets/urdf/GR1T2_no_hand.urdf
 urdf_package_dirs: [assets/urdf]
