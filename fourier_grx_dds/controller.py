@@ -33,7 +33,7 @@ class RobotController:
         self.joint_names = list(self.joints.keys())
         self.enabled_joint_names = set([joint_name for joint_name in self.joints if self.joints[joint_name]["enable"]]) # TODO: fix joint names
         self.robot_type = self.config.robot.upper()
-        
+        self.ee_link = self.config.ee_link
         self.freq = self.config.frequency
         self.disabled_pose_solver = self.config["disabled_pose_solver"]
         if self.robot_type.startswith("GR1"):
@@ -334,7 +334,7 @@ class RobotController:
                 self.kinematics_solver.set_joint_positions(self.joint_names, q)
             else:
                 self.kinematics_solver.set_joint_positions(self.joint_names, current_q)
-            res.append(self.kinematics_solver.get_transform(self.config.ee_link[chain], "base_link"))
+            res.append(self.kinematics_solver.get_transform(self.ee_link[chain], "base_link"))
             # Recover the original joint positions
             self.kinematics_solver.set_joint_positions(self.joint_names, current_q)
         return res
