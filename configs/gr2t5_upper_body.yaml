@@ -40,9 +40,6 @@ target_hz: 120
 impedance_controller:
   k: [
       60.0,
-      60.0,
-      60.0,
-      15.0,
       15.0,
       15.0,
       60.0,
@@ -60,12 +57,9 @@ impedance_controller:
       15.0,
       15.0,
     ]
-  b: [5.0, 5.0, 5.0, 1.0, 1.0, 1.0, 5.0, 5.0, 5.0, 5.0, 1.0, 1.0, 1.0, 5.0, 5.0, 5.0, 5.0, 1.0, 1.0, 1.0]
-  m: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  b: [5.0, 1.0, 1.0, 5.0, 5.0, 5.0, 5.0, 1.0, 1.0, 1.0, 5.0, 5.0, 5.0, 5.0, 1.0, 1.0, 1.0]
+  m: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
   max_effort: [
-                50.0,
-                50.0,
-                50.0,
                 50.0,
                 50.0,
                 50.0,
@@ -382,7 +376,7 @@ joints:
     actuator_type: FSA_TYPE_250830
   left_wrist_pitch_joint:
     enable: true
-    direction: -1
+    direction: 1
     initialization_pose_degree: 0
     min_pose_degree: -34.95042550298022
     max_pose_degree: 34.95042550298022
@@ -480,7 +474,7 @@ joints:
     actuator_type: FSA_TYPE_250830
   right_wrist_pitch_joint:
     enable: true
-    direction: -1
+    direction: 1
     initialization_pose_degree: 0
     min_pose_degree: -34.95042550298022
     max_pose_degree: 34.95042550298022

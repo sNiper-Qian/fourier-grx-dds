@@ -376,7 +376,7 @@ joints:
     actuator_type: FSA_TYPE_250830
   left_wrist_pitch_joint:
     enable: true
-    direction: -1
+    direction: 1
     initialization_pose_degree: 0
     min_pose_degree: -34.95042550298022
     max_pose_degree: 34.95042550298022
@@ -474,7 +474,7 @@ joints:
     actuator_type: FSA_TYPE_250830
   right_wrist_pitch_joint:
     enable: false
-    direction: -1
+    direction: 1
     initialization_pose_degree: 0
     min_pose_degree: -34.95042550298022
     max_pose_degree: 34.95042550298022
