@@ -10,6 +10,7 @@ from fourier_grx_dds import pydds
 import time
 from enum import IntEnum
 from fourier_grx_dds.utils import ControlMode
+from loguru import logger
 
 class StateMachine:
     def __init__(self, dds_context, targets, topic_prefix="fftai/gr1t2"):
@@ -246,10 +247,10 @@ class DDSPipeline:
         time.sleep(0.1)
         joint_states, integrality = self.get_pvc_states()
         
-        if not integrality:
-            for j, v in joint_states.items():
-                if v.status != "OK":
-                    print(f'{j}: {v.status}')
+        # if not integrality:
+        #     for j, v in joint_states.items():
+        #         if v.status != "OK":
+        #             print(f'{j}: {v.status}')
         assert integrality, f"PVC states is not integrality"
         
         joint_pos = []
@@ -277,7 +278,7 @@ class DDSPipeline:
             if joint["enable"]:
                 position_kp = joint["position_kp"]
                 velocity_kp = joint["velocity_kp"]
-                print(f"Set joint [{joint_name}] pid: position_kp = {position_kp}, velocity_kp = {velocity_kp}")
+                logger.info(f"Set joint [{joint_name}] pid: position_kp = {position_kp}, velocity_kp = {velocity_kp}")
                 self.pidimm_control.push(joint_name, position_kp, velocity_kp, 0.0)
         self.pidimm_control.emit()
     
@@ -288,7 +289,7 @@ class DDSPipeline:
                 position_kp = position_kps[i]
                 velocity_kp = velocity_kps[i]
                 velocity_ki = velocity_kis[i]
-                print(f"Set joint [{joint_name}] pid: position_kp = {position_kp}, velocity_kp = {velocity_kp}, velocity_ki = {velocity_kis[i]}")
+                logger.info(f"Set joint [{joint_name}] pid: position_kp = {position_kp}, velocity_kp = {velocity_kp}, velocity_ki = {velocity_kis[i]}")
                 self.pidimm_control.push(joint_name, position_kp, velocity_kp, velocity_ki)
         self.pidimm_control.emit()
 
@@ -308,6 +309,10 @@ class DDSPipeline:
     def get_pvc_states(self):
         states = self.pvc_state.get_states()
         integrality = all([states[target].status == "OK" for target in self.joint_names])
+        if not integrality:
+            for target in self.joint_names:
+                if states[target].status != "OK":
+                    logger.warning(f"{target}: no response")
         return states, integrality
 
     def get_encoders_state(self, retry=5):
@@ -346,7 +351,7 @@ class DDSPipeline:
             else:
                 error_message = "Failed."
 
-            print(f"Warning[retry = {retry}]: Can not fetch the whole encoders_state. Details are as below:\n{error_message}")
+            logger.warning(f"Warning[retry = {retry}]: Can not fetch the whole encoders_state. Details are as below:\n{error_message}")
             time.sleep(0.2)
             retry -= 1
         return responses, integrality

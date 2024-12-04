@@ -4,6 +4,7 @@ A simple example to demonstrate the usage of the robot controller.
 import argparse
 from fourier_grx_dds.utils import GR1ControlGroup
 from fourier_grx_dds.controller import RobotController
+from fourier_grx_dds.gravity_compensation import GravityCompensator
 import time
 import numpy as np
 
@@ -12,21 +13,23 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str, help="Path to the configuration file")
     args = parser.parse_args()
-    controller = RobotController(args.config)
+    # controller = RobotController(args.config)
+    controller = GravityCompensator(args.config)
     controller.enable()
     # Move both arms to a specific position
+    head_and_waist_position = [0.0]*controller.control_group.HEAD.num_joints + [0.0]*controller.control_group.WAIST.num_joints
     left_arm_position = [
                             0, -0.07329939774949822, 0.06528929994794762, 
-                            -np.pi/2, -0.15687147335078633, -0.13071683482883256, 
-                            -0.17893611111972085  
+                            -np.pi/2, -0.15687147335078633, 0.5, 
+                            0 
                         ] 
     right_arm_position = [
                             0, -0.07329939774949822, 0.06528929994794762, 
                             -np.pi/2, -0.15687147335078633, -0.13071683482883256, 
                             0.17893611111972085  
                         ]
-    arm_position = left_arm_position + right_arm_position
-    controller.move_joints(controller.control_group.UPPER, arm_position, duration=2.0)    
+    position = head_and_waist_position + left_arm_position + right_arm_position
+    controller.move_joints(controller.control_group.UPPER_EXTENDED, position, duration=2.0) 
     # Perform forward kinematics and get the SE3 representation of the end effectors
     res = controller.forward_kinematics(chain_names=["left_arm", "right_arm"])
     print("SE3 of left ee:", res[0])
