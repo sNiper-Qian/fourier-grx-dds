@@ -308,9 +308,9 @@ class DDSPipeline:
 
     def get_pvc_states(self):
         states = self.pvc_state.get_states()
-        integrality = all([states[target].status == "OK" for target in self.joint_names])
+        integrality = all([states[target].status == "OK" for target in self.enabled_joint_names])
         if not integrality:
-            for target in self.joint_names:
+            for target in self.enabled_joint_names:
                 if states[target].status != "OK":
                     logger.warning(f"{target}: no response")
         return states, integrality
