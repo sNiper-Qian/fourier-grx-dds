@@ -3,7 +3,7 @@ packages = find_packages(include=['fourier_grx_dds', 'fourier_grx_dds.*'])
 print("Packages found:", packages)
 setup(
     name='fourier-grx-dds',
-    version='0.2.7_beta',
+    version='0.2.8_beta',
     packages=find_packages(include=['fourier_grx_dds', 'fourier_grx_dds.*']),
     include_package_data=True,
     package_data={

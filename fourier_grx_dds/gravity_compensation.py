@@ -131,7 +131,7 @@ class GravityCompensator(RobotController):
             self.target_hz = target_hz
         self.joint_names = list(self.config.joints.keys())
 
-        self.config = self.config.get("impedance_controller", {})
+        self.ic_config = self.config.get("impedance_controller", {})
         self.position_history = deque(maxlen=20)
         self.dt = dt
 
@@ -163,7 +163,7 @@ class GravityCompensator(RobotController):
                 1,
             ]
             k = np.array(
-            self.config.get(
+            self.ic_config.get(
                 "k",
                 [
                     60.0,
@@ -190,19 +190,19 @@ class GravityCompensator(RobotController):
             )
             )
             b = np.array(
-            self.config.get(
+            self.ic_config.get(
                 "b",
                 [5.0, 5.0, 5.0, 1.0, 1.0, 1.0, 5.0, 5.0, 5.0, 5.0, 1.0, 1.0, 1.0, 5.0, 5.0, 5.0, 5.0, 1.0, 1.0, 1.0],
             )
             )
             m = np.array(
-                self.config.get(
+                self.ic_config.get(
                     "m",
                     [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
                 )
             )
             max_effort = np.array(
-                self.config.get(
+                self.ic_config.get(
                     "max_effort",
                     [
                         50.0,
@@ -251,7 +251,7 @@ class GravityCompensator(RobotController):
                 1,
             ]
             k = np.array(
-            self.config.get(
+            self.ic_config.get(
                 "k",
                 [
                     60.0,
@@ -275,19 +275,19 @@ class GravityCompensator(RobotController):
             )
             )
             b = np.array(
-            self.config.get(
+            self.ic_config.get(
                 "b",
                 [5.0, 1.0, 1.0, 5.0, 5.0, 5.0, 5.0, 1.0, 1.0, 1.0, 5.0, 5.0, 5.0, 5.0, 1.0, 1.0, 1.0],
             )
             )
             m = np.array(
-                self.config.get(
+                self.ic_config.get(
                     "m",
                     [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
                 )
             )
             max_effort = np.array(
-                self.config.get(
+                self.ic_config.get(
                     "max_effort",
                     [
                         50.0,

@@ -16,7 +16,7 @@ Run:
 
 ```bash
 sudo apt install libtinyxml2-6a
-pip install fourier-grx-dds==0.2.3b0
+pip install fourier-grx-dds==0.2.8b0
 ```
 
 #### Install from source

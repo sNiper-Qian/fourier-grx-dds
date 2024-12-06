@@ -277,12 +277,15 @@ class RobotController:
                 while not (trajectory.finished(t := time.time() - start_time) or self._abort_event.is_set()):
                     pos = trajectory.at(t)
                     self.connector.move_joints(pos2cmd(pos))
+                    self.kinematics_solver.set_joint_positions(self.joint_names, self.joint_positions.copy())
+                    self.kinematics_solver.update_display()
                     time.sleep(1 / self.freq)
-
             self._abort_event.clear()
         
         if duration == 0.0:
             self.connector.move_joints(pos2cmd(target_pos))
+            self.kinematics_solver.set_joint_positions(self.joint_names, self.joint_positions.copy())
+            self.kinematics_solver.update_display()
         elif duration > 0.0 and blocking:
             task(current_pos, target_pos, duration)
         else:
@@ -326,17 +329,23 @@ class RobotController:
             list: The end effector pose is a list of 4x4 transformation matrices. The order of the matrices is the same as the order of the chain names. The transformation matrix is in the `base_link` frame.
         """
         res = []
+        left_link = self.config.named_links["left_end_effector_link"]
+        right_link = self.config.named_links["right_end_effector_link"]
+        head_link = self.config.named_links["head_link"]
+        root_link = self.config.named_links["root_link"]
+        qpos = self.joint_positions.copy() if q is None else q
         for chain in chain_names:
             if chain not in ["head", "left_arm", "right_arm"]:
                 raise ValueError(f"Unknown chain name: {chain}")
-            current_q = self.joint_positions.copy()
-            if q is not None:
-                self.kinematics_solver.set_joint_positions(self.joint_names, q)
-            else:
-                self.kinematics_solver.set_joint_positions(self.joint_names, current_q)
-            res.append(self.kinematics_solver.get_transform(self.ee_link[chain], "base_link"))
-            # Recover the original joint positions
-            self.kinematics_solver.set_joint_positions(self.joint_names, current_q)
+            if chain == "head":
+                head_pose = self.kinematics_solver.frame_placement(qpos, head_link, root_link).homogeneous
+                res.append(head_pose)
+            elif chain == "left_arm":
+                left_pose = self.kinematics_solver.frame_placement(qpos, left_link, root_link).homogeneous
+                res.append(left_pose)
+            elif chain == "right_arm":
+                right_pose = self.kinematics_solver.frame_placement(qpos, right_link, root_link).homogeneous
+                res.append(right_pose)
         return res
 
     def inverse_kinematics(
@@ -346,7 +355,8 @@ class RobotController:
             move=False,
             dt: float = 0.005,
             velocity_scaling_factor: float = 1.0,
-            convergence_threshold: float = 1e-8,
+            convergence_threshold: float = 1e-5,
+            max_iterations: int = 100,
     ) -> np.ndarray:
         """Get the joint positions for the specified chains to reach the target pose in base_link frame.
 
@@ -355,15 +365,37 @@ class RobotController:
             targets (list[np.ndarray]): The target poses in base_link frame.
             move (bool, optional): Whether to move the robot to the target pose. Defaults to False.
             dt (float): The time step for the inverse kinematics.
-
+            convergence_threshold (float): The tolerance for the convergence of the inverse kinematics.
+            max_iterations (int): The maximum number of iterations for the inverse kinematics.
         Returns:
             np.ndarray: The joint positions to reach the target pose (in radians).
         """
-
         left_target = None if "left_arm" not in chain_names else targets[chain_names.index("left_arm")]
         right_target = None if "right_arm" not in chain_names else targets[chain_names.index("right_arm")]
         head_target = None if "head" not in chain_names else targets[chain_names.index("head")]
-        self.kinematics_solver.solve(left_target, right_target, head_target, dt)
+        # Iterate until convergence
+        errors = []
+        itr = 0
+        self.kinematics_solver.set_joint_positions(self.joint_names, self.joint_positions.copy())
+        while True:
+            self.kinematics_solver.solve(left_target, right_target, head_target, dt)
+            if left_target is not None:
+                left_current_pose = self.kinematics_solver.frame_placement(self.kinematics_solver.configuration.q, self.config.named_links["left_end_effector_link"], self.config.named_links["root_link"])
+                errors.append(self.kinematics_solver._check_pose_error(left_current_pose, left_target, convergence_threshold))
+            if right_target is not None:
+                right_current_pose = self.kinematics_solver.frame_placement(self.kinematics_solver.configuration.q, self.config.named_links["right_end_effector_link"], self.config.named_links["root_link"])
+                errors.append(self.kinematics_solver._check_pose_error(right_current_pose, right_target, convergence_threshold))
+            if head_target is not None:
+                head_current_pose = self.kinematics_solver.frame_placement(self.kinematics_solver.configuration.q, self.config.named_links["head_link"], self.config.named_links["root_link"])
+                errors.append(self.kinematics_solver._check_pose_error(head_current_pose, head_target, convergence_threshold))
+            if all(errors):
+                logger.info(f"Inverse kinematics converged in {itr} iterations.")
+                break
+            itr += 1
+            if itr > max_iterations:
+                logger.warning("Inverse kinematics did not converge.")
+                break
+        # self.kinematics_solver.solve(left_target, right_target, head_target, dt)
         q = self.kinematics_solver.get_joint_positions(self.joint_names)
         if move:
             self.move_joints(self.control_group.ALL, q, duration=dt/velocity_scaling_factor*100, blocking=True)
