@@ -104,6 +104,8 @@ class RobotWrapper:
         """Convert q vector from real robot convention to pink convention."""
         q_pink = self.configuration.q.copy()
         for name, value in zip(self.joint_names, q, strict=True):
+            if self.get_idx_q_from_name(name) is None:
+                continue
             q_pink[self.get_idx_q_from_name(name)] = value
         return q_pink
 
@@ -136,8 +138,8 @@ class RobotWrapper:
     def get_joint_by_name(self, name: str):
         """Get joint object by its name."""
         try:
-            joint_id = self.full_model.getJointId(name)
-            joint = self.full_model.joints[joint_id]
+            joint_id = self.model.getJointId(name)
+            joint = self.model.joints[joint_id]
             return joint
         except IndexError as err:
             raise IndexError(f"Joint {name} not found in robot model") from err
@@ -148,7 +150,10 @@ class RobotWrapper:
         Args:
             name (str): Name of the joint.
         """
-        return self.get_joint_by_name(name).idx_q
+        try:
+            return self.get_joint_by_name(name).idx_q
+        except:
+            return None
 
     def get_q_from_name(self, name: str):
         """Get joint position in Pinocchio configuration vector by its name.
@@ -273,13 +278,25 @@ class RobotWrapper:
             logger.warning(f"Joint {joint_name} not found in robot model")
             return
         self.robot.model.velocityLimit[self.get_idx_v_from_name(joint_name)] = limit
+    
+    def frame_placement(self, q: np.ndarray, frame_name: str, source_frame: str | None = None) -> pin.SE3:
+        """Get the placement of a frame in the robot model.
 
-    def frame_placement(self, q: np.ndarray, frame_name: str) -> pin.SE3:
-        if len(q) == 32:
+        Args:
+            q (np.ndarray): Joint positions.
+            frame_name (str): Name of the frame.
+            source_frame (str | None, optional): Name of the source frame. Defaults to None. If None, the default world frame is used.
+        """
+        if len(q) != self.robot.nq:
             q = self.q_real2pink(q)
 
         frame_idx = self.model.getFrameId(frame_name)
-        return self.robot.framePlacement(q, frame_idx)
+        frame_transform = self.robot.framePlacement(q, frame_idx)
+        if source_frame is None:
+            return frame_transform
+        source_frame_idx = self.model.getFrameId(source_frame)
+        source_frame_transform = self.robot.framePlacement(q, source_frame_idx)
+        return source_frame_transform.inverse() * frame_transform
 
     def get_transforms(self, frame_names: Sequence[str]) -> list[pin.SE3]:
         return [self.configuration.get_transform_frame_to_world(frame_name).np for frame_name in frame_names]

@@ -150,3 +150,26 @@ class KinematicsSolver(RobotWrapper):
         xyz = se3[:3, 3]
         ortho6d = self.so3_to_ortho6d(so3)
         return np.concatenate([xyz, ortho6d])
+
+    def _check_pose_error(self, current_pose: pin.SE3, target_pose: np.ndarray, threshold: float):
+        """
+        Compute pose error and check if it's within the tolerance.
+
+        Args:
+            current_pose (pin.SE3): Current pose of the frame.
+            target_pose (np.ndarray): Target pose as a 4x4 homogeneous matrix.
+            threshold (float): Unified tolerance for pose error.
+
+        Returns:
+            bool: True if the pose error is within tolerance, False otherwise.
+        """
+        target_se3 = pin.SE3(translation=target_pose[:3, 3], rotation=target_pose[:3, :3])
+
+        # Compute translation error
+        translation_error = np.linalg.norm(current_pose.translation - target_se3.translation)
+
+        # Compute rotation error (as the norm of the rotation vector)
+        rotation_error = np.linalg.norm(pin.log3(current_pose.rotation @ target_se3.rotation.T))
+
+        # Use threshold for both errors
+        return max(translation_error, rotation_error) < threshold

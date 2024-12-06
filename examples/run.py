@@ -19,14 +19,12 @@ def main() -> None:
     # Move both arms to a specific position
     head_and_waist_position = [0.0]*controller.control_group.HEAD.num_joints + [0.0]*controller.control_group.WAIST.num_joints
     left_arm_position = [
-                            0, -0.07329939774949822, 0.06528929994794762, 
-                            -np.pi/2, -0.15687147335078633, 0.5, 
-                            0 
+                            0, 0, 0, 
+                            -np.pi/2, 0, 0, 0
                         ] 
     right_arm_position = [
-                            0, -0.07329939774949822, 0.06528929994794762, 
-                            -np.pi/2, -0.15687147335078633, -0.13071683482883256, 
-                            0.17893611111972085  
+                            0, 0, 0, 
+                            -np.pi/2, 0, 0, 0
                         ]
     position = head_and_waist_position + left_arm_position + right_arm_position
     controller.move_joints(controller.control_group.UPPER_EXTENDED, position, duration=2.0) 
